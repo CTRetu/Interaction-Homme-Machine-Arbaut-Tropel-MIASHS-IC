@@ -10,19 +10,27 @@ import pandas as pd
 import time
 from datetime import datetime
 
-# Liste des cryptos à récupérer (identifiants CoinGecko), saisie manuelle
-coins = [
-    "bitcoin",
-    "ethereum",
-    "ripple",       # pour XRP
-    "tether",
-    "binancecoin",  # pour BNB
-    "solana",
-    "usd-coin",     # pour USDC
-    "dogecoin",
-    "cardano",
-    "tron"
-]
+# Fonction pour obtenir les top N cryptos
+def get_top_coins(n=10, vs_currency="usd"):
+    '''
+    Récupère les N cryptomonnaies les plus capitalisées.
+    '''
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    params = {
+        "vs_currency": vs_currency,
+        "order": "market_cap_desc",
+        "per_page": n,
+        "page": 1,
+        "sparkline": False
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+    # Extraire les IDs CoinGecko
+    top_coins = [coin["id"] for coin in data]
+    return top_coins
+
+coins = get_top_coins()
+# print(coins)
 
 # Dates de la plage
 start_date = "2025-01-01"
