@@ -3,12 +3,12 @@
 
     <!-- Bandeau d’intro -->
     <section class="intro-section">
-      <h1>TOP CRYPTO</h1> <br/>
+      <h1>TOP CRYPTO</h1>
+      <h2>Bienvenue sur Top Crypto !</h2>
       <p>
-        <h2>Bienvenue sur Top Crypto !</h2> <br/>
-        Ceci est un site de visualisation des crypto-monnaies les plus importantes du marché actuel. <br/><br/>
-        <h3>Améliorez vos suivis et analyses avec Top Crypto !</h3>
+        Ceci est un site de visualisation des crypto-monnaies les plus importantes du marché actuel.
       </p>
+      <h3>Améliorez vos suivis et analyses avec Top Crypto !</h3>
     </section>
 
     <!-- Section : Gagnants / Tendance -->

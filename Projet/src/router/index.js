@@ -7,6 +7,8 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import CryptoTableView from '../views/CryptoTableView.vue'
+import AllArticles from '../views/AllArticles.vue'
+
 
 export default createRouter({
   history: createWebHistory(),
@@ -15,8 +17,9 @@ export default createRouter({
     { path: '/', name: 'home', component: HomeView },
     { path: '/crypto-table', name: 'crypto-table', component: CryptoTableView },
     { path: '/crypto/:symbol', name: 'crypto-detail', component: CryptoDetailView },
-    { path: '/article/:id', name: 'article', component: ArticleView },
     { path: '/community', name: 'community', component: CommunityView },
+    { path: '/community/articles/all', name: 'all-articles', component: AllArticles },
+    { path: "/community/articles/:id", name: "article-view", component: ArticleView },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
 
