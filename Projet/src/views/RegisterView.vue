@@ -51,20 +51,45 @@ export default {
   },
   methods: {
     handleRegister() {
+
       if (this.password !== this.passwordConfirm) {
         alert("Les mots de passe ne correspondent pas.");
         return;
       }
 
-      // Ici tu mettras plus tard un appel API
-      console.log("Compte créé :", {
+      // 1) Récupérer la liste des utilisateurs existants
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      // 2) Vérifier que l'email n'est pas déjà utilisé
+      const already = users.find(u => u.email === this.email);
+
+      if (already) {
+        alert("Un compte existe déjà avec cet email.");
+        return;
+      }
+
+      // 3) Ajouter l'utilisateur
+      users.push({
         pseudo: this.pseudo,
         email: this.email,
+        password: this.password,
         keepConnected: this.keepConnected
       });
 
-      alert("Compte créé avec succès !");
-      this.$router.push("/login");
+      // 4) Enregistrer dans localStorage
+      localStorage.setItem("users", JSON.stringify(users));
+
+      // 5) Mettre l'utilisateur comme connecté
+      localStorage.setItem("currentUser", JSON.stringify({
+        pseudo: this.pseudo,
+        email: this.email
+      }));
+
+      // 6) Redirection vers paramètres AVEC message
+      this.$router.push({
+        name: "settings",
+        query: { created: "1" }
+      });
     }
   }
 };

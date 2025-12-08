@@ -8,6 +8,7 @@ import RegisterView from '../views/RegisterView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import CryptoTableView from '../views/CryptoTableView.vue'
 
+
 export default createRouter({
   history: createWebHistory(),
 
