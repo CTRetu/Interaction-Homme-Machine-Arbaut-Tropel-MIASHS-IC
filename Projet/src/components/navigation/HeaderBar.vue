@@ -26,8 +26,8 @@
 
         <!-- Non connecté -->
         <template v-if="!isLoggedIn">
-          <RouterLink to="/login" class="btn-primary">
-            Se connecter
+          <RouterLink to="/register" class="btn-primary">
+            Se connecter/S'inscrire
           </RouterLink>
         </template>
 

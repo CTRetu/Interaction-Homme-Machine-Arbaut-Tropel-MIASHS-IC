@@ -500,3 +500,96 @@ nav a:hover {
   font-size: 14px;
   padding: 6px 12px;
 }
+/* ----------------------------------------------------------
+   PAGE REGISTER : compatible dark/light
+----------------------------------------------------------- */
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-secondary);      /* ⚡ thème */
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border: 1px solid var(--border-color); /* ⚡ thème */
+}
+
+.register-card h1 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: var(--text-color);             /* ⚡ thème */
+}
+
+.login-link {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-light);             /* ⚡ thème */
+}
+
+.login-link a {
+  color: var(--primary);                /* ⚡ thème */
+}
+
+form label {
+  font-weight: 600;
+  margin-top: 15px;
+  display: block;
+  color: var(--text-color);             /* ⚡ thème */
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);  /* ⚡ thème */
+  background: var(--bg-secondary);        /* ⚡ thème */
+  color: var(--text-color);               /* ⚡ thème */
+}
+
+form input::placeholder {
+  color: var(--text-light);               /* ⚡ thème */
+}
+
+.keep-connected span {
+  color: var(--text-color);               /* ⚡ thème */
+}
+
+.btn-primary {
+  width: 100%;
+  background: var(--primary);             /* ⚡ thème */
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);       /* ⚡ thème */
+}
+
+/* Lisibilité des liens dans la page Register (dark mode) */
+html.dark .register-card a {
+  color: #ffffff !important;
+}
+
+html.dark .small-login-btn {
+  background: #ffffff20; /* bouton discret blanc semi-transparent */
+  color: white !important;
+}
+
+html.dark .small-login-btn:hover {
+  background: #ffffff35;
+}

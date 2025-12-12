@@ -10,6 +10,7 @@ import CryptoTableView from '../views/CryptoTableView.vue'
 import AllArticles from '../views/AllArticles.vue'
 
 
+
 export default createRouter({
   history: createWebHistory(),
 
