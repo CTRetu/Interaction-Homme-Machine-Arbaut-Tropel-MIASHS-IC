@@ -2,6 +2,7 @@
   <div class="settings-container">
 
     <h1 class="page-title">Paramètres de compte</h1>
+    <br/>
 
     <!-- Message succès après inscription -->
     <p class="success-message" v-if="showSuccessMessage">
@@ -15,6 +16,8 @@
       <div v-if="!editing">
         <p><strong>Pseudo :</strong> {{ userPseudo }}</p>
         <p><strong>Email :</strong> {{ userEmail }}</p>
+
+        <br/>
 
         <button class="btn-primary" @click="editing = true">
           Modifier mes informations
@@ -40,6 +43,7 @@
         <button class="btn-primary" @click="updateAccount">
           Enregistrer les modifications
         </button>
+        <br/>
 
         <!-- Suppression compte -->
         <section class="card delete-section">
@@ -98,6 +102,7 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
       <button class="btn-reset" @click="resetDashboard">
         Réinitialiser le tableau de bord
       </button>
+      <br/>
 
       <div class="dashboard-grid">
 
@@ -118,17 +123,21 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
             @dragend="onDragEnd"
             @touchstart="onTouchStart(index)">
 
+            <button class="delete-widget" @click="removeWidget(index)">✖</button>
+
             <!-- -------- WIDGET NUMBER -------- -->
             <div v-if="allWidgets[widgetId].type === 'number'" class="widget-number">
-              <h3>{{ allWidgets[widgetId].title }}</h3>
-              <p class="widget-value">{{ allWidgets[widgetId].value }}</p>
+              <div class="widget-content">
+                <h3 class="widget-title">{{ allWidgets[widgetId].title }}</h3>
+                <p class="widget-value">{{ allWidgets[widgetId].value }}</p>
 
-              <table class="mini-table">
-                <tr v-for="row in getNumberWidgetPageRows(widgetId)" :key="row.key">
-                  <td>{{ row.label }}</td>
-                  <td class="right">{{ row.value }}</td>
-                </tr>
-              </table>
+                <table class="mini-table">
+                  <tr v-for="row in getNumberWidgetPageRows(widgetId)" :key="row.key">
+                    <td>{{ row.label }}</td>
+                    <td class="right">{{ row.value }}</td>
+                  </tr>
+                </table>
+              </div>
 
               <div class="table-pagination"
                 v-if="getNumberWidgetTotalPages(widgetId) > 1">
@@ -176,14 +185,16 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 
             <!-- -------- WIDGET TABLE -------- -->
             <div v-else-if="allWidgets[widgetId].type === 'table'" class="widget-table">
-              <h3>{{ allWidgets[widgetId].title }}</h3>
+              <div class="widget-content">
+                <h3 class="widget-title">{{ allWidgets[widgetId].title }}</h3>
 
-              <table>
-                <tr v-for="row in getTablePageRows(widgetId)" :key="row.key">
-                  <td>{{ row.label }}</td>
-                  <td class="right">{{ row.value }}</td>
-                </tr>
-              </table>
+                <table>
+                  <tr v-for="row in getTablePageRows(widgetId)" :key="row.key">
+                    <td>{{ row.label }}</td>
+                    <td class="right">{{ row.value }}</td>
+                  </tr>
+                </table>
+              </div>
 
               <div class="table-pagination"
                    v-if="getTotalTablePages(widgetId) > 1">
@@ -235,99 +246,116 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
       <h2>Personnaliser les notifications</h2>
       <p class="hint">Les notifications se font uniquement par email.</p>
 
-      <table class="notif-table">
+      <table colspan="2" class="notif-table">
 
-        <!-- Ligne header avec titre + boutons -->
-        <tr class="notif-header-row">
-          <td colspan="2" class="notif-header-with-buttons">
+        <!-- Gestion globale -->
+        <tr>
+          <td class="notif-category-title">Gestion de toutes les notifications</td>
+          <td>
+            <div class="toggle-cell">
+              <div class="notif-group-selector-inline">
+                <button
+                  :class="{ active: notificationGroupPortfolio === 'all' }"
+                  @click="setPortfolioGroup('all')"
+                >Toutes</button>
 
-            <span class="notif-category-title-inline">Variation du portefeuille</span>
+                <button
+                  :class="{ active: notificationGroupPortfolio === 'none' }"
+                  @click="setPortfolioGroup('none')"
+                >Aucune</button>
 
-            <div class="notif-group-selector-inline">
-              <button
-                :class="{ active: notificationGroupPortfolio === 'all' }"
-                @click="setPortfolioGroup('all')"
-              >Toutes</button>
-
-              <button
-                :class="{ active: notificationGroupPortfolio === 'none' }"
-                @click="setPortfolioGroup('none')"
-              >Aucune</button>
-
-              <button
-                :class="{ active: notificationGroupPortfolio === 'custom' }"
-                @click="setPortfolioGroup('custom')"
-              >Personnalisé</button>
+                <button
+                  :class="{ active: notificationGroupPortfolio === 'custom' }"
+                  disabled
+                >Personnalisé</button>
+              </div>
             </div>
-
           </td>
         </tr>
 
-        <!-- Rows -->
+        <!-- Variation portefeuille -->
+        <tr>
+          <td class="notif-category-title">Variation du portefeuille</td>
+        </tr>
+
         <tr>
           <td>Gains</td>
           <td class="toggle-cell">
-            <Toggle v-model="notificationsPortfolio.gains" @change="updatePortfolioGroup" />
+            <Toggle
+              v-model="notificationsPortfolio.gains"
+              @change="updatePortfolioGroup"
+            />
           </td>
         </tr>
 
         <tr>
           <td>Pertes</td>
           <td class="toggle-cell">
-            <Toggle v-model="notificationsPortfolio.pertes" @change="updatePortfolioGroup" />
+            <Toggle
+              v-model="notificationsPortfolio.pertes"
+              @change="updatePortfolioGroup"
+            />
           </td>
         </tr>
 
-        <tr>
-          <td>Toutes variations</td>
-          <td class="toggle-cell">
-            <Toggle v-model="notificationsPortfolio.toutes" @change="updatePortfolioGroup" />
-          </td>
-        </tr>
-
-        <!-- ==== Communauté ==== -->
+        <!-- Communauté -->
         <tr>
           <td colspan="2" class="notif-category-title">Communauté</td>
         </tr>
 
         <tr>
           <td>Recommandations d’articles</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell">
+            <Toggle v-model="notificationsPortfolio.recommandations_articles" @change="updatePortfolioGroup" />
+          </td>
         </tr>
+
         <tr>
           <td>Commentaires sous vos articles</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell">
+            <Toggle v-model="notificationsPortfolio.commentaires" @change="updatePortfolioGroup" />
+          </td>
         </tr>
+
         <tr>
           <td>Réponses à vos commentaires</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell">
+            <Toggle v-model="notificationsPortfolio.reponses" @change="updatePortfolioGroup" />
+          </td>
         </tr>
+
         <tr>
           <td>Demandes de suivi</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell">
+            <Toggle v-model="notificationsPortfolio.demandes_suivi" @change="updatePortfolioGroup" />
+          </td>
         </tr>
+
         <tr>
           <td>Activités des personnes suivies</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell">
+            <Toggle v-model="notificationsPortfolio.activites_suivies" @change="updatePortfolioGroup" />
+          </td>
         </tr>
 
-
-        <!-- ==== Recommandations crypto ==== -->
+        <!-- Reco crypto -->
         <tr>
           <td colspan="2" class="notif-category-title">Recommandations crypto</td>
         </tr>
 
         <tr>
           <td>Recommandations du jour</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell">
+            <Toggle v-model="notificationsPortfolio.recommandations_crypto" @change="updatePortfolioGroup" />
+          </td>
         </tr>
 
       </table>
-
     </section>
 
-
-    <button class="btn-save">Enregistrer les modifications</button>
+    <button class="btn-save" @click="$router.push('/')">
+      Enregistrer les modifications
+    </button>
 
   </div>
 </template>
@@ -409,7 +437,7 @@ export default {
           type: "table",
           title: "Détails investissements",
           source: "ownedCryptos",
-          pageSize: 4
+          pageSize: 3
         },
         investTotal: {
           type: "number",
@@ -422,7 +450,7 @@ export default {
           type: "table",
           title: "Recommandations Crypto",
           source: "static",
-          pageSize: 3,
+          pageSize: 2,
           rows: [
             { key: "avax", label: "Avalanche (AVAX)", value: "Tendance : HAUSSE" },
             { key: "link", label: "Chainlink (LINK)", value: "Tendance : FORTE HAUSSE" },
@@ -505,12 +533,20 @@ export default {
       draggingIndex: null,
       hoverIndex: null,
 
-      // Notifications variation portefeuille
-      notificationGroupPortfolio: "none",
+      // Notifications
+      notificationGroupPortfolio: "all",
+
       notificationsPortfolio: {
-        gains: false,
-        pertes: false,
-        toutes: false
+        gains: true,
+        pertes: true,
+
+        recommandations_articles: true,
+        commentaires: true,
+        reponses: true,
+        demandes_suivi: true,
+        activites_suivies: true,
+
+        recommandations_crypto: true
       }
     };
   },
@@ -548,6 +584,9 @@ export default {
     // Rendu initial des graphiques
     this.renderAllCharts();
 
+    // Écouter les changements de thème
+    window.addEventListener('themeChange', this.renderAllCharts);
+
     // Initialiser les pages pour les widgets "number"
     this.dashboard.forEach(w => {
       const widget = this.allWidgets[w];
@@ -557,6 +596,10 @@ export default {
         }
       }
     });
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('themeChange', this.renderAllCharts);
   },
 
   computed: {
@@ -814,6 +857,9 @@ export default {
       const el = document.getElementById(containerId);
       if (!el) return;
 
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#f0f0f0' : '#333';
+
       const widget = this.allWidgets[widgetId];
       const symbol = this.selectedCryptoByWidget[widgetId];
       const data = this.chartData[symbol][widget.detailType];
@@ -842,16 +888,20 @@ export default {
 
         xAxis: {
           categories,
-          title: { text: "Temps" }
+          title: { text: "Temps", style: { color: textColor } },
+          labels: { style: { color: textColor } }
         },
 
         yAxis: {
-          title: { text: "$US" }
+          title: { text: "$US", style: { color: textColor } },
+          labels: { style: { color: textColor } }
         },
 
         tooltip: {
           valueDecimals: 2,
-          valueSuffix: " $US"
+          valueSuffix: " $US",
+          backgroundColor: isDark ? '#333' : '#fff',
+          style: { color: textColor }
         },
 
         series: [
@@ -974,461 +1024,35 @@ export default {
       return Math.max(1, Math.ceil(rows.length / pageSize));
     },
 
-    /* ---------- Notifications variation portefeuille ---------- */
-    updatePortfolioGroup() {
-      const { gains, pertes, toutes } = this.notificationsPortfolio;
-
-      if (gains && pertes && toutes) {
-        this.notificationGroupPortfolio = "all";
-      } else if (!gains && !pertes && !toutes) {
-        this.notificationGroupPortfolio = "none";
-      } else {
-        this.notificationGroupPortfolio = "custom";
-      }
+    removeWidget(index) {
+      this.dashboard.splice(index, 1);
+      this.saveDashboard();
+      this.renderAllCharts();
     },
 
+    /* ---------- Notifications variation portefeuille ---------- */
     setPortfolioGroup(mode) {
-      this.notificationGroupPortfolio = mode;
+      this.notificationGroupPortfolio = mode
+      const value = mode === "all"
 
-      if (mode === "all") {
-        this.notificationsPortfolio = {
-          gains: true,
-          pertes: true,
-          toutes: true
-        };
-      } else if (mode === "none") {
-        this.notificationsPortfolio = {
-          gains: false,
-          pertes: false,
-          toutes: false
-        };
-      } else if (mode === "custom") {
-        // On ne touche pas aux valeurs : l'utilisateur gère à la main
+      Object.keys(this.notificationsPortfolio).forEach(key => {
+        this.notificationsPortfolio[key] = value
+      })
+    },
+
+    updatePortfolioGroup() {
+      const values = Object.values(this.notificationsPortfolio)
+
+      if (values.every(v => v === true)) {
+        this.notificationGroupPortfolio = "all"
+      } else if (values.every(v => v === false)) {
+        this.notificationGroupPortfolio = "none"
+      } else {
+        this.notificationGroupPortfolio = "custom"
       }
     }
+
+
   }
 };
 </script>
-
-<style scoped>
-/* -------- GLOBAL -------- */
-.settings-container {
-  width: 90%;
-  max-width: 950px;
-  margin: auto;
-  padding: 30px 0;
-  color: #3b3b3b;
-  font-family: "Segoe UI", sans-serif;
-}
-
-.page-title {
-  font-size: 28px;
-  color: #d18c00;
-}
-
-.success-message {
-  color: #2ecc71;
-  margin-bottom: 20px;
-}
-
-/* -------- CARDS -------- */
-.card {
-  background: #fff8e6;
-  border: 1px solid #dcb676;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 25px;
-}
-
-.card h2 {
-  color: #d18c00;
-  margin-bottom: 12px;
-}
-
-/* -------- BUTTONS -------- */
-.btn-primary,
-.btn-delete,
-.btn-cancel,
-.btn-reset,
-.btn-save {
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  color: white;
-  display: block;
-  width: 90%;
-  max-width: 300px;
-  margin: 12px auto 0 auto;
-}
-
-.btn-primary {
-  background: #e0a74f;
-}
-.btn-primary:hover {
-  background: #cf8e2f;
-}
-
-.btn-reset {
-  background: #c94f4f;
-  max-width: 220px;
-}
-.btn-reset:hover {
-  background: #a73f3f;
-}
-
-.btn-delete {
-  background: #ff6b6b;
-}
-.btn-delete:hover {
-  background: #e04848;
-}
-
-.btn-cancel {
-  background: #b6b6b6;
-}
-.btn-cancel:hover {
-  background: #8f8f8f;
-}
-
-.btn-save {
-  background: #d18c00;
-  max-width: 350px;
-}
-.btn-save:hover {
-  background: #b67500;
-}
-
-/* -------- INPUTS -------- */
-input {
-  width: 60%;
-  padding: 10px;
-  border: 1px solid #cdaa6f;
-  border-radius: 6px;
-  margin: 6px 0 12px;
-}
-
-/* -------- PORTFOLIOS -------- */
-.wallet-list {
-  margin-top: 10px;
-}
-
-.wallet-item {
-  background: #ffe9c4;
-  border: 1px solid #d4b07a;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 8px;
-  position: relative;
-}
-
-.wallet-delete {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 3px 7px;
-  cursor: pointer;
-}
-
-.wallet-delete:hover {
-  background: #d9534f;
-}
-
-.wallet-success {
-  color: #2ecc71;
-  margin-top: 5px;
-}
-
-/* -------- INFO ICONS -------- */
-.info-icon,
-.info-icon-dashboard {
-  font-size: 18px;
-  margin-left: 6px;
-  cursor: help;
-  color: #d18c00;
-}
-
-/* -------- DASHBOARD GRID -------- */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.dashboard-slot {
-  height: 210px;
-  position: relative;
-}
-
-.dashboard-slot.drag-hover {
-  background: #fff3d270;
-  border: 2px dashed #d18c00;
-  border-radius: 14px;
-}
-
-.dash-item {
-  background: #ffe9c4;
-  border: 2px solid #d4b07a;
-  border-radius: 14px;
-  padding: 16px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  cursor: grab;
-}
-
-.dash-item:active {
-  cursor: grabbing;
-}
-
-.dash-add {
-  background: #fff3d2;
-  border: 2px dashed #cfa45a;
-  border-radius: 14px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #8a6d3b;
-}
-.dash-add:hover {
-  background: #ffeec0;
-}
-
-/* Add menu */
-.add-menu {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  background: #fff8e6;
-  border: 1px solid #dcb676;
-  border-radius: 12px;
-  padding: 12px;
-  z-index: 10;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.add-menu-item {
-  background: #e0a74f;
-  color: white;
-  padding: 6px 10px;
-  margin: 5px 0;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.add-menu-item:hover {
-  background: #cf8e2f;
-}
-
-/* -------- WIDGETS : TITRES -------- */
-.widget-title {
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: #7a5600;
-  margin-bottom: 10px;
-}
-
-/* -------- WIDGET NUMBER -------- */
-.widget-number {
-  text-align: center;
-}
-
-.widget-value {
-  font-size: 30px;
-  font-weight: bold;
-  margin: 8px 0;
-}
-
-.mini-table {
-  width: 100%;
-  font-size: 13px;
-}
-
-.mini-table td {
-  padding: 3px 5px;
-}
-
-.mini-table .right {
-  text-align: right;
-}
-
-/* -------- WIDGET TABLE -------- */
-.widget-table table {
-  width: 100%;
-}
-.widget-table td {
-  border-bottom: 1px solid #e4cfa6;
-  padding: 5px 8px;
-}
-
-.widget-table .right {
-  text-align: right;
-}
-
-/* Pagination */
-.table-pagination {
-  margin-top: 6px;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  font-size: 13px;
-}
-.table-pagination button {
-  background: #e0a74f;
-  color: white;
-  border-radius: 6px;
-  border: none;
-  padding: 3px 6px;
-  cursor: pointer;
-}
-.table-pagination button:hover {
-  background: #cf8e2f;
-}
-
-/* -------- WIDGET CHART -------- */
-.chart-controls {
-  text-align: center;
-  margin-bottom: 4px;
-}
-
-.crypto-select {
-  background: transparent;
-  border: 1px solid #cfa45a;
-  border-radius: 6px;
-  padding: 4px 6px;
-  color: #7a5600;
-  font-weight: bold;
-}
-
-.chart-container {
-  height: 150px;
-}
-
-/* -------- NOTIFICATIONS -------- */
-
-/* Header group (Toutes / Aucune / Personnalisé) */
-.notif-group-selector {
-  display: flex;
-  gap: 10px;
-  margin: 12px 0;
-}
-
-.notif-group-selector button {
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: 1px solid #cfa45a;
-  background: #ecd8a5;
-  color: #7a5600;
-  cursor: pointer;
-}
-
-.notif-group-selector button.active {
-  background: #d18c00;
-  color: white;
-  font-weight: bold;
-}
-
-.notif-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-.notif-table tr {
-  border-bottom: 1px solid #d4b07a;
-}
-
-.notif-table td {
-  padding: 10px 6px;
-  font-size: 16px;
-  color: #6a4d1c;
-}
-
-.notif-category-title {
-  padding-top: 15px;
-  padding-bottom: 4px;
-  font-weight: bold;
-  color: #d18c00;
-}
-
-.toggle-cell {
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* -------- RESPONSIVE -------- */
-@media (max-width: 900px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-  .dashboard-slot {
-    height: auto;
-    min-height: 220px;
-  }
-  .dash-item {
-    height: auto;
-  }
-  .chart-container {
-    height: 190px !important;
-  }
-}
-
-
-/* Ligne d’en-tête avec boutons intégrés */
-.notif-header-row td {
-  background: var(--notif-bg);
-  padding: 12px 8px;
-}
-
-.notif-header-with-buttons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.notif-category-title-inline {
-  font-weight: bold;
-  color: var(--text-title);
-  font-size: 18px;
-}
-
-/* Boutons inline */
-.notif-group-selector-inline {
-  display: flex;
-  gap: 8px;
-}
-
-.notif-group-selector-inline button {
-  padding: 6px 14px;
-  border-radius: 20px;
-  background: #ecd8a5;
-  border: 1px solid #cfa45a;
-  color: #7a5600;
-  cursor: pointer;
-  transition: 0.2s;
-  font-size: 14px;
-}
-
-.notif-group-selector-inline button.active {
-  background: #d18c00;
-  color: white;
-}
-
-</style>

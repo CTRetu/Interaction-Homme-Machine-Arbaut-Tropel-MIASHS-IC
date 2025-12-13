@@ -74,6 +74,7 @@ function logout() {
 function toggleTheme() {
   isDark.value = !isDark.value
   document.documentElement.className = isDark.value ? "dark" : "light"
+  window.dispatchEvent(new Event('themeChange'));
 }
 
 onMounted(() => {
