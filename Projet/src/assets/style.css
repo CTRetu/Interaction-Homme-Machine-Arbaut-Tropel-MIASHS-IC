@@ -942,7 +942,7 @@ html.dark .hint {
 }
 
 html.dark .page-title {
-  color: var(--text-color);
+  color: #f2b45b;
 }
 
 html.dark .info-icon::after {
@@ -961,6 +961,11 @@ html.dark .table-pagination button:hover {
 
 html.dark .notif-table td {
   color: #f0f0f0;
+}
+
+html.dark .notif-table tr {
+  background-color: #333;
+  border-bottom-color: #444;
 }
 
 html.dark .notif-category-title {
@@ -1054,6 +1059,123 @@ html.dark .btn-save:hover {
 
 html.dark .card p {
   color: #f0f0f0;
+}
+
+/* -------- CRYPTO TABLE VIEW -------- */
+.page-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.crypto-container {
+  overflow-x: auto;
+}
+
+.sort-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sort-container label {
+  font-weight: bold;
+}
+
+.sort-container select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+td:nth-child(2) {
+  max-width: 150px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: left;
+}
+
+.positive {
+  color: #16a34a;
+}
+
+.negative {
+  color: #dc2626;
+}
+
+.sparkline {
+  width: 120px;
+  height: 40px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-weight: bold;
+}
+
+/* Dark mode for crypto table */
+html.dark table {
+  color: #f0f0f0;
+}
+
+html.dark th,
+html.dark td {
+  border-bottom-color: #555;
+}
+
+html.dark .pagination button {
+  background: #f2b45b;
+  color: #1b1b1b;
+}
+
+html.dark .pagination button:disabled {
+  background: #555;
+  color: #ccc;
+}
+
+html.dark .sort-container select {
+  background: #333;
+  color: #f0f0f0;
+  border-color: #555;
 }
 
 /* Add menu */
@@ -1199,7 +1321,8 @@ html.dark .card p {
 }
 
 .notif-table tr {
-  border-bottom: 1px solid #d4b07a;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f5e8;
 }
 
 .notif-table td {
@@ -1208,16 +1331,27 @@ html.dark .card p {
   color: #6a4d1c;
 }
 
+.notif-table td:last-child {
+  text-align: right;
+  min-width: 200px;
+}
+
 .notif-category-title {
   padding-top: 15px;
   padding-bottom: 4px;
   font-weight: bold;
   color: #d18c00;
+  text-align: left;
+}
+
+.notif-text {
+  text-align: left !important;
 }
 
 .toggle-cell {
   display: flex;
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 /* -------- RESPONSIVE -------- */
@@ -1269,14 +1403,14 @@ html.dark .card p {
 }
 
 .notif-group-selector-inline button {
-  padding: 6px 14px;
+  padding: 4px 8px;
   border-radius: 20px;
   background: #ecd8a5;
   border: 1px solid #cfa45a;
   color: #7a5600;
   cursor: pointer;
   transition: 0.2s;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .notif-group-selector-inline button.active {

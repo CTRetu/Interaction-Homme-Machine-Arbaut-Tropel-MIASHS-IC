@@ -246,11 +246,11 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
       <h2>Personnaliser les notifications</h2>
       <p class="hint">Les notifications se font uniquement par email.</p>
 
-      <table colspan="2" class="notif-table">
+      <table class="notif-table">
 
         <!-- Gestion globale -->
         <tr>
-          <td class="notif-category-title">Gestion de toutes les notifications</td>
+          <td class="notif-category-title notif-text">Gestion de toutes les notifications</td>
           <td>
             <div class="toggle-cell">
               <div class="notif-group-selector-inline">
@@ -275,11 +275,11 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 
         <!-- Variation portefeuille -->
         <tr>
-          <td class="notif-category-title">Variation du portefeuille</td>
+          <td colspan="2" class="notif-category-title notif-text">Variation du portefeuille</td>
         </tr>
 
         <tr>
-          <td>Gains</td>
+          <td class="notif-text">Gains</td>
           <td class="toggle-cell">
             <Toggle
               v-model="notificationsPortfolio.gains"
@@ -289,7 +289,7 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
         </tr>
 
         <tr>
-          <td>Pertes</td>
+          <td class="notif-text">Pertes</td>
           <td class="toggle-cell">
             <Toggle
               v-model="notificationsPortfolio.pertes"
@@ -300,39 +300,39 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 
         <!-- Communauté -->
         <tr>
-          <td colspan="2" class="notif-category-title">Communauté</td>
+          <td colspan="2" class="notif-category-title notif-text">Communauté</td>
         </tr>
 
         <tr>
-          <td>Recommandations d’articles</td>
+          <td class="notif-text">Recommandations d’articles</td>
           <td class="toggle-cell">
             <Toggle v-model="notificationsPortfolio.recommandations_articles" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td>Commentaires sous vos articles</td>
+          <td class="notif-text">Commentaires sous vos articles</td>
           <td class="toggle-cell">
             <Toggle v-model="notificationsPortfolio.commentaires" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td>Réponses à vos commentaires</td>
+          <td class="notif-text">Réponses à vos commentaires</td>
           <td class="toggle-cell">
             <Toggle v-model="notificationsPortfolio.reponses" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td>Demandes de suivi</td>
+          <td class="notif-text">Demandes de suivi</td>
           <td class="toggle-cell">
             <Toggle v-model="notificationsPortfolio.demandes_suivi" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td>Activités des personnes suivies</td>
+          <td class="notif-text">Activités des personnes suivies</td>
           <td class="toggle-cell">
             <Toggle v-model="notificationsPortfolio.activites_suivies" @change="updatePortfolioGroup" />
           </td>
@@ -340,11 +340,11 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 
         <!-- Reco crypto -->
         <tr>
-          <td colspan="2" class="notif-category-title">Recommandations crypto</td>
+          <td colspan="2" class="notif-category-title notif-text">Recommandations crypto</td>
         </tr>
 
         <tr>
-          <td>Recommandations du jour</td>
+          <td class="notif-text">Recommandations du jour</td>
           <td class="toggle-cell">
             <Toggle v-model="notificationsPortfolio.recommandations_crypto" @change="updatePortfolioGroup" />
           </td>

@@ -1,99 +1,214 @@
 <template>
-  <main>
-    <section class="card">
-      <h2>Liste complète des crypto-monnaies</h2>
+  <div class="crypto-container">
+    <br /> 
+    <h1 class="page-title">Tableau récapitulatif des crypto-monnaies</h1>
 
-      <div class="crypto-table-wrapper">
-        <table class="crypto-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nom</th>
-              <th>Cours</th>
-              <th>12 H</th>
-              <th>24 H</th>
-              <th>3 J</th>
-              <th>7 J</th>
-              <th>Volume 24 H</th>
-              <th>Capitalisation</th>
-              <th>Évolution 7 J</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="crypto in paginatedCryptos" :key="crypto.rank">
-              <td>{{ crypto.rank }}</td>
-              <td>
-                <img :src="crypto.icon" class="coin-ico" />
-                {{ crypto.name }}
-              </td>
-              <td>{{ crypto.price }}</td>
-              <td :class="crypto.h12.class">{{ crypto.h12.value }}</td>
-              <td :class="crypto.h24.class">{{ crypto.h24.value }}</td>
-              <td :class="crypto.d3.class">{{ crypto.d3.value }}</td>
-              <td :class="crypto.d7.class">{{ crypto.d7.value }}</td>
-              <td>{{ crypto.volume24h }}</td>
-              <td>{{ crypto.marketcap }}</td>
-              <td></td> <!-- tu pourras mettre ton tracé / sparkline ici -->
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="sort-container">
+      <label>Trier par :</label>
+      <select v-model="sortOption" @change="sortCryptos">
+        <option value="price_desc">Prix décroissant</option>
+        <option value="price_asc">Prix croissant</option>
+        <option value="name_asc">Nom A-Z</option>
+        <option value="name_desc">Nom Z-A</option>
+      </select>
+    </div>
 
-      <!-- Pagination -->
-      <div class="pagination-footer">
-        <button
-          class="btn-primary"
-          :disabled="currentPage === 1"
-          @click="currentPage--"
-        >
-          ← Page précédente
-        </button>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Cours</th>
+          <th>1 H</th>
+          <th>24 H</th>
+          <th>7 J</th>
+          <th>14 J</th>
+          <th>Volume 24 H</th>
+          <th>Capitalisation</th>
+          <th>Évolution 7 J</th>
+        </tr>
+      </thead>
 
-        <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <tbody>
+        <tr v-for="(coin, index) in paginatedCryptos" :key="coin.id">
+          <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+          <td style="text-align: left;" :title="coin.name"><img :src="coin.image" alt="" width="20" style="margin-right: 8px;" />{{ coin.name }}</td>
+          <td>{{ formatPrice(coin.current_price) }}</td>
+          <td :class="color(coin.price_change_percentage_1h_in_currency)">
+            {{ formatPercent(coin.price_change_percentage_1h_in_currency) }}
+          </td>
+          <td :class="color(coin.price_change_percentage_24h_in_currency)">
+            {{ formatPercent(coin.price_change_percentage_24h_in_currency) }}
+          </td>
+          <td :class="color(coin.price_change_percentage_7d_in_currency)">
+            {{ formatPercent(coin.price_change_percentage_7d_in_currency) }}
+          </td>
+          <td :class="color(coin.price_change_percentage_14d_in_currency)">
+            {{ formatPercent(coin.price_change_percentage_14d_in_currency) }}
+          </td>
+          <td>{{ formatPrice(coin.total_volume) }}</td>
+          <td>{{ formatPrice(coin.market_cap) }}</td>
 
-        <button
-          class="btn-primary"
-          :disabled="currentPage === totalPages"
-          @click="currentPage++"
-        >
-          Page suivante →
-        </button>
-      </div>
-    </section>
-  </main>
+          <!-- Sparkline -->
+          <td>
+            <div :id="'spark-' + ((currentPage - 1) * itemsPerPage + index)" class="sparkline"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">Précédent</button>
+      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Suivant</button>
+    </div>
+  </div>
 </template>
 
-<script setup>
-import { computed, ref } from "vue";
+<script>
+import Highcharts from "highcharts";
 
-// 50 entrées d'exemple pour illustrer 2 pages de 25
-// Tu pourras remplacer ce tableau par de vraies données (API, etc.)
-const cryptos = ref(
-  Array.from({ length: 50 }).map((_, index) => {
-    const rank = index + 1;
+export default {
+  data() {
     return {
-      rank,
-      name: `Crypto ${rank}`,
-      icon: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
-      price: "120 000 $US",
-      h12: { value: "1,01%", class: "up" },
-      h24: { value: "1,23%", class: "up" },
-      d3:  { value: "0,30%", class: rank % 2 === 0 ? "down" : "up" },
-      d7:  { value: "1,10%", class: "up" },
-      volume24h: "45 000",
-      marketcap: "100 000 000",
+      cryptos: [],
+      currentPage: 1,
+      itemsPerPage: 25,
+      sortOption: 'price_desc',
     };
-  })
-);
+  },
 
-const perPage = 25;
-const currentPage = ref(1);
+  mounted() {
+    this.fetchCryptos();
+  },
 
-const totalPages = computed(() => Math.ceil(cryptos.value.length / perPage));
+  computed: {
+    paginatedCryptos() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.cryptos.slice(start, end);
+    },
 
-const paginatedCryptos = computed(() => {
-  const start = (currentPage.value - 1) * perPage;
-  const end = start + perPage;
-  return cryptos.value.slice(start, end);
-});
+    totalPages() {
+      return Math.ceil(this.cryptos.length / this.itemsPerPage);
+    },
+  },
+
+  methods: {
+    async fetchCryptos() {
+      const url =
+        "https://api.coingecko.com/api/v3/coins/markets" +
+        "?vs_currency=usd&order=market_cap_desc&per_page=50&page=1" +
+        "&sparkline=true&price_change_percentage=1h,24h,7d,14d";
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      // Assigner les sparklines
+      data.forEach(coin => {
+        coin.sparkline = coin.sparkline_in_7d?.price || [];
+      });
+
+      this.cryptos = data;
+
+      this.$nextTick(() => {
+        this.sortCryptos();
+      });
+    },
+
+    renderSparklines() {
+      this.paginatedCryptos.forEach((coin, index) => {
+        const containerId = 'spark-' + ((this.currentPage - 1) * this.itemsPerPage + index);
+        const el = document.getElementById(containerId);
+        if (!el || !coin.sparkline || coin.sparkline.length === 0) return;
+
+        const options = this.sparklineOptions(coin.sparkline);
+        Highcharts.chart(containerId, options);
+      });
+    },
+
+    sparklineOptions(data) {
+      const isUp = data[data.length - 1] > data[0];
+
+      return {
+        chart: {
+          type: "line",
+          backgroundColor: "transparent",
+          height: 40,
+          width: 120,
+          margin: [2, 0, 2, 0],
+        },
+        title: { text: null },
+        credits: { enabled: false },
+        legend: { enabled: false },
+        xAxis: { visible: false },
+        yAxis: { visible: false },
+        tooltip: {
+          enabled: true,
+          formatter: function() {
+            return this.y.toFixed(2) + ' $US';
+          }
+        },
+        plotOptions: {
+          series: {
+            lineWidth: 2,
+            marker: { enabled: false },
+            color: isUp ? "#16a34a" : "#dc2626",
+          },
+        },
+        series: [
+          {
+            data,
+          },
+        ],
+      };
+    },
+
+    formatPrice(value) {
+      return value
+        ? value.toLocaleString("fr-FR", {
+            style: "currency",
+            currency: "USD",
+          })
+        : "-";
+    },
+
+    formatPercent(value) {
+      return value !== undefined ? value.toFixed(2) + " %" : "-";
+    },
+
+    color(value) {
+      return value > 0 ? "positive" : "negative";
+    },
+
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.$nextTick(() => this.renderSparklines());
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.$nextTick(() => this.renderSparklines());
+      }
+    },
+
+    sortCryptos() {
+      if (this.sortOption === 'price_desc') {
+        this.cryptos.sort((a, b) => b.current_price - a.current_price);
+      } else if (this.sortOption === 'price_asc') {
+        this.cryptos.sort((a, b) => a.current_price - b.current_price);
+      } else if (this.sortOption === 'name_asc') {
+        this.cryptos.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (this.sortOption === 'name_desc') {
+        this.cryptos.sort((a, b) => b.name.localeCompare(a.name));
+      }
+      this.currentPage = 1;
+      this.$nextTick(() => this.renderSparklines());
+    },
+  },
+};
 </script>
