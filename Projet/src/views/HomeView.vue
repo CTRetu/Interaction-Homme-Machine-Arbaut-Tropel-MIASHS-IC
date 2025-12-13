@@ -90,10 +90,10 @@
               <th>#</th>
               <th>Nom</th>
               <th>Cours</th>
-              <th>12 H</th>
+              <th>1 H</th>
               <th>24 H</th>
-              <th>3 J</th>
               <th>7 J</th>
+              <th>14 J</th>
               <th>Volume 24 H</th>
               <th>Capitalisation</th>
               <th>Évolution 7 J</th>
@@ -101,147 +101,30 @@
           </thead>
 
           <tbody>
+            <tr v-for="(coin, index) in topTenCryptos" :key="coin.id">
+              <td>{{ index + 1 }}</td>
+              <td style="text-align: left;" :title="coin.name"><img :src="coin.image" alt="" width="20" style="margin-right: 8px;" />{{ coin.name }}</td>
+              <td>{{ formatPrice(coin.current_price) }}</td>
+              <td :class="color(coin.price_change_percentage_1h_in_currency)">
+                {{ formatPercent(coin.price_change_percentage_1h_in_currency) }}
+              </td>
+              <td :class="color(coin.price_change_percentage_24h_in_currency)">
+                {{ formatPercent(coin.price_change_percentage_24h_in_currency) }}
+              </td>
+              <td :class="color(coin.price_change_percentage_7d_in_currency)">
+                {{ formatPercent(coin.price_change_percentage_7d_in_currency) }}
+              </td>
+              <td :class="color(coin.price_change_percentage_14d_in_currency)">
+                {{ formatPercent(coin.price_change_percentage_14d_in_currency) }}
+              </td>
+              <td>{{ formatPrice(coin.total_volume) }}</td>
+              <td>{{ formatPrice(coin.market_cap) }}</td>
 
-            <!-- 1 : Bitcoin -->
-            <tr>
-              <td>1</td>
-              <td><img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="coin-ico"> Bitcoin</td>
-              <td>150 576 $US</td>
-              <td class="up">1,01%</td>
-              <td class="up">1,23%</td>
-              <td class="up">1,32%</td>
-              <td class="up">1,25%</td>
-              <td>54 877</td>
-              <td>156 967 890</td>
-              <td></td>
+              <!-- Sparkline -->
+              <td>
+                <div :id="'spark-home-' + index" class="sparkline"></div>
+              </td>
             </tr>
-
-            <!-- 2 : Ethereum -->
-            <tr>
-              <td>2</td>
-              <td><img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="coin-ico"> Ethereum</td>
-              <td>140 356 $US</td>
-              <td class="up">1,05%</td>
-              <td class="up">1,02%</td>
-              <td class="up">1,09%</td>
-              <td class="down">1,04%</td>
-              <td>34 923</td>
-              <td>134 567 098</td>
-              <td></td>
-            </tr>
-
-            <!-- 3 : Tether -->
-            <tr>
-              <td>3</td>
-              <td><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="coin-ico"> Tether</td>
-              <td>135 785 $US</td>
-              <td class="down">0,39%</td>
-              <td class="up">1,34%</td>
-              <td class="down">0,30%</td>
-              <td class="up">1,24%</td>
-              <td>56 844</td>
-              <td>102 356 765</td>
-              <td></td>
-            </tr>
-
-            <!-- 4 : BNB -->
-            <tr>
-              <td>4</td>
-              <td><img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="coin-ico"> BNB</td>
-              <td>134 543 $US</td>
-              <td class="down">0,02%</td>
-              <td class="down">0,30%</td>
-              <td class="up">1,02%</td>
-              <td class="down">0,32%</td>
-              <td>45 897</td>
-              <td>102 673 637</td>
-              <td></td>
-            </tr>
-
-            <!-- 5 : Solana -->
-            <tr>
-              <td>5</td>
-              <td><img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="coin-ico"> Solana</td>
-              <td>134 521 $US</td>
-              <td class="up">1,09%</td>
-              <td class="up">1,01%</td>
-              <td class="up">1,09%</td>
-              <td class="up">1,01%</td>
-              <td>34 655</td>
-              <td>102 630 667</td>
-              <td></td>
-            </tr>
-
-            <!-- 6 : USDC -->
-            <tr>
-              <td>6</td>
-              <td><img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" class="coin-ico"> USDC</td>
-              <td>124 908 $US</td>
-              <td class="up">1,07%</td>
-              <td class="down">1,23%</td>
-              <td class="down">1,29%</td>
-              <td class="down">1,27%</td>
-              <td>23 543</td>
-              <td>101 123 897</td>
-              <td></td>
-            </tr>
-
-            <!-- 7 : Dogecoin -->
-            <tr>
-              <td>7</td>
-              <td><img src="https://cryptologos.cc/logos/dogecoin-doge-logo.png" class="coin-ico"> Dogecoin</td>
-              <td>121 432 $US</td>
-              <td class="up">1,42%</td>
-              <td class="down">1,10%</td>
-              <td class="up">1,23%</td>
-              <td class="up">1,32%</td>
-              <td>68 549</td>
-              <td>104 678 453</td>
-              <td></td>
-            </tr>
-
-            <!-- 8 : Lido Staked Ether -->
-            <tr>
-              <td>8</td>
-              <td><img src="https://cryptologos.cc/logos/lido-dao-ldo-logo.png" class="coin-ico"> Lido Staked Ether</td>
-              <td>121 358 $US</td>
-              <td class="down">0,78%</td>
-              <td class="up">1,63%</td>
-              <td class="up">1,24%</td>
-              <td class="up">1,09%</td>
-              <td>45 456</td>
-              <td>105 387 889</td>
-              <td></td>
-            </tr>
-
-            <!-- 9 : XRP -->
-            <tr>
-              <td>9</td>
-              <td><img src="https://cryptologos.cc/logos/xrp-xrp-logo.png" class="coin-ico"> XRP</td>
-              <td>121 201 $US</td>
-              <td class="up">1,01%</td>
-              <td class="up">1,03%</td>
-              <td class="up">1,06%</td>
-              <td class="down">0,08%</td>
-              <td>45 653</td>
-              <td>106 789 678</td>
-              <td></td>
-            </tr>
-
-            <!-- 10 : Cardano -->
-            <tr>
-              <td>10</td>
-              <td><img src="https://cryptologos.cc/logos/cardano-ada-logo.png" class="coin-ico"> Cardano</td>
-              <td>120 598 $US</td>
-              <td class="up">0,51%</td>
-              <td class="down">0,09%</td>
-              <td class="down">0,06%</td>
-              <td class="down">0,12%</td>
-              <td>23 987</td>
-              <td>102 565 789</td>
-              <td></td>
-            </tr>
-
           </tbody>
         </table>
         <div class="table-footer">
@@ -263,7 +146,101 @@
 </template>
 
 <script setup>
-// pas besoin de script pour le moment
+import { ref, computed, nextTick } from 'vue';
+import Highcharts from 'highcharts';
+
+const cryptos = ref([]);
+
+const topTenCryptos = computed(() => {
+  return cryptos.value.slice(0, 10);
+});
+
+async function fetchCryptos() {
+  const url =
+    "https://api.coingecko.com/api/v3/coins/markets" +
+    "?vs_currency=usd&order=market_cap_desc&per_page=10&page=1" +
+    "&sparkline=true&price_change_percentage=1h,24h,7d,14d";
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  data.forEach(coin => {
+    coin.sparkline = coin.sparkline_in_7d?.price || [];
+  });
+
+  cryptos.value = data;
+
+  nextTick(() => {
+    renderSparklines();
+  });
+}
+
+function renderSparklines() {
+  topTenCryptos.value.forEach((coin, index) => {
+    const containerId = 'spark-home-' + index;
+    const el = document.getElementById(containerId);
+    if (!el || !coin.sparkline || coin.sparkline.length === 0) return;
+
+    const options = sparklineOptions(coin.sparkline);
+    Highcharts.chart(containerId, options);
+  });
+}
+
+function sparklineOptions(data) {
+  const isUp = data[data.length - 1] > data[0];
+
+  return {
+    chart: {
+      type: "line",
+      backgroundColor: "transparent",
+      height: 40,
+      width: 120,
+      margin: [2, 0, 2, 0],
+    },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: { visible: false },
+    yAxis: { visible: false },
+    tooltip: {
+      enabled: true,
+      formatter: function() {
+        return this.y.toFixed(2) + ' $US';
+      }
+    },
+    plotOptions: {
+      series: {
+        lineWidth: 2,
+        marker: { enabled: false },
+        color: isUp ? "#16a34a" : "#dc2626",
+      },
+    },
+    series: [
+      {
+        data,
+      },
+    ],
+  };
+}
+
+function formatPrice(value) {
+  return value
+    ? value.toLocaleString("fr-FR", {
+        style: "currency",
+        currency: "USD",
+      })
+    : "-";
+}
+
+function formatPercent(value) {
+  return value !== undefined ? value.toFixed(2) + " %" : "-";
+}
+
+function color(value) {
+  return value > 0 ? "positive" : "negative";
+}
+
+fetchCryptos();
 </script>
 
 <style scoped>
@@ -308,5 +285,98 @@
 
 .big-card {
   min-height: 250px;
+}
+
+/* Table styles */
+.crypto-table-wrapper {
+  overflow-x: auto;
+}
+
+.crypto-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.crypto-table thead {
+  background-color: var(--bg-tertiary);
+}
+
+.crypto-table th {
+  padding: 12px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.crypto-table th:first-child,
+.crypto-table td:first-child {
+  text-align: center;
+}
+
+.crypto-table th:nth-child(2),
+.crypto-table td:nth-child(2) {
+  text-align: left;
+}
+
+.crypto-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.crypto-table tbody tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.crypto-table td {
+  padding: 12px;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.crypto-table img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.crypto-table .positive {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.crypto-table .negative {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.sparkline {
+  height: 40px;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 10px 24px;
+  background-color: var(--primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-see-more {
+  margin-top: 20px;
 }
 </style>
