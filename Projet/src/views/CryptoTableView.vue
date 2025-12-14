@@ -6,6 +6,8 @@
     <div class="sort-container">
       <label>Trier par :</label>
       <select v-model="sortOption" @change="sortCryptos">
+        <option value="market_cap_desc">Capitalisation décroissante</option>
+        <option value="market_cap_asc">Capitalisation croissante</option>
         <option value="price_desc">Prix décroissant</option>
         <option value="price_asc">Prix croissant</option>
         <option value="name_asc">Nom A-Z</option>
@@ -75,7 +77,7 @@ export default {
       cryptos: [],
       currentPage: 1,
       itemsPerPage: 25,
-      sortOption: 'price_desc',
+      sortOption: 'market_cap_desc',
     };
   },
 
@@ -85,12 +87,18 @@ export default {
 
   computed: {
     paginatedCryptos() {
+      if (!this.cryptos || this.cryptos.length === 0) {
+        return [];
+      }
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.cryptos.slice(start, end);
     },
 
     totalPages() {
+      if (!this.cryptos || this.cryptos.length === 0) {
+        return 1;
+      }
       return Math.ceil(this.cryptos.length / this.itemsPerPage);
     },
   },
@@ -111,6 +119,7 @@ export default {
       });
 
       this.cryptos = data;
+      this.currentPage = 1;
 
       this.$nextTick(() => {
         this.sortCryptos();
@@ -175,7 +184,7 @@ export default {
     },
 
     formatPercent(value) {
-      return value !== undefined ? value.toFixed(2) + " %" : "-";
+      return (value !== undefined && value !== null) ? value.toFixed(2) + " %" : "-";
     },
 
     color(value) {
@@ -197,7 +206,11 @@ export default {
     },
 
     sortCryptos() {
-      if (this.sortOption === 'price_desc') {
+      if (this.sortOption === 'market_cap_desc') {
+        this.cryptos.sort((a, b) => b.market_cap - a.market_cap);
+      } else if (this.sortOption === 'market_cap_asc') {
+        this.cryptos.sort((a, b) => a.market_cap - b.market_cap);
+      } else if (this.sortOption === 'price_desc') {
         this.cryptos.sort((a, b) => b.current_price - a.current_price);
       } else if (this.sortOption === 'price_asc') {
         this.cryptos.sort((a, b) => a.current_price - b.current_price);
@@ -206,7 +219,12 @@ export default {
       } else if (this.sortOption === 'name_desc') {
         this.cryptos.sort((a, b) => b.name.localeCompare(a.name));
       }
-      this.currentPage = 1;
+      
+      // Réinitialiser à la page 1 seulement si on change le tri manuellement
+      if (this.currentPage !== 1) {
+        this.currentPage = 1;
+      }
+      
       this.$nextTick(() => this.renderSparklines());
     },
   },
