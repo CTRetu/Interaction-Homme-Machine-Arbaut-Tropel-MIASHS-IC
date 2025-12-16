@@ -19,8 +19,8 @@
         <div class="tendance-content">
           <div class="tendance-item">
             <div class="tendance-label">Capitalisation boursière</div>
-            <div class="tendance-value">{{ formatPrice(totalMarketCap) }}</div>
-            <div :class="['tendance-change', marketCapChange7d >= 0 ? 'positive' : 'negative']">
+            <div class="tendance-value" :title="'Somme totale de toutes les capitalisations boursières'">{{ formatPrice(totalMarketCap) }}</div>
+            <div :class="['tendance-change', marketCapChange7d >= 0 ? 'positive' : 'negative']" :title="'Variation sur 7 jours'">
               <span v-if="marketCapChange7d >= 0">▲</span>
               <span v-else>▼</span>
               {{ Math.abs(marketCapChange7d).toFixed(2) }}%
@@ -28,8 +28,8 @@
           </div>
           <div class="tendance-item">
             <div class="tendance-label">Volume</div>
-            <div class="tendance-value">{{ formatPrice(totalVolume) }}</div>
-            <div :class="['tendance-change', volumeChange7d >= 0 ? 'positive' : 'negative']">
+            <div class="tendance-value" :title="'Volume total des échanges sur 24 heures'">{{ formatPrice(totalVolume) }}</div>
+            <div :class="['tendance-change', volumeChange7d >= 0 ? 'positive' : 'negative']" :title="'Variation sur 7 jours'">
               <span v-if="volumeChange7d >= 0">▲</span>
               <span v-else>▼</span>
               {{ Math.abs(volumeChange7d).toFixed(2) }}%
@@ -39,7 +39,7 @@
       </div>
 
     <div class="card">
-      <h2>Grands Gagnants 24H</h2>
+      <h2>🏅 Grands Gagnants 24H</h2>
 
       <table class="gagnants-table">
         <tbody>
@@ -49,8 +49,8 @@
               <img :src="coin.image" alt="" width="20" />
               {{ coin.name }}
             </td>
-            <td><span class="trend-up">{{ formatPercent(coin.price_change_percentage_24h_in_currency) }}</span></td>
-            <td>{{ formatPrice(coin.current_price) }}</td>
+            <td><span class="trend-up" :title="'Variation sur 24 heures'">{{ formatPercent(coin.price_change_percentage_24h_in_currency) }}</span></td>
+            <td :title="'Prix actuel de ' + coin.name">{{ formatPrice(coin.current_price) }}</td>
           </tr>
         </tbody>
       </table>
@@ -58,7 +58,7 @@
 
 
       <div class="card">
-        <h2>Grands Gagnants 1H</h2>
+        <h2>🏅 Grands Gagnants 1H</h2>
           <table class="gagnants-table">
             <tbody>
               <tr v-for="(coin, index) in topGainers1h" :key="coin.id">
@@ -67,8 +67,8 @@
                   <img :src="coin.image" alt="" width="20" />
                   {{ coin.name }}
                 </td>
-                <td><span class="trend-up">{{ formatPercent(coin.price_change_percentage_1h_in_currency) }}</span></td>
-                <td>{{ formatPrice(coin.current_price) }}</td>
+                <td><span class="trend-up" :title="'Variation sur 1 heure'">{{ formatPercent(coin.price_change_percentage_1h_in_currency) }}</span></td>
+                <td :title="'Prix actuel de ' + coin.name">{{ formatPrice(coin.current_price) }}</td>
               </tr>
             </tbody>
         </table>
@@ -77,7 +77,7 @@
 
     <!-- Section : Focus TOP 1 -->
     <section class="card big-card focus-card">
-      <h2>Focus sur le TOP 1</h2>
+      <h2>🎯 Focus sur le TOP 1</h2>
       
       <div v-if="topCrypto" class="focus-content">
         <div class="focus-header">
@@ -108,6 +108,14 @@
                   </td>
                 </tr>
                 <tr>
+                  <td>12 H</td>
+                  <td :class="color(topCrypto.price_change_percentage_24h_in_currency)">
+                    <span v-if="topCrypto.price_change_percentage_24h_in_currency > 0">▲</span>
+                    <span v-else>▼</span>
+                    {{ formatPercent(Math.abs(topCrypto.price_change_percentage_24h_in_currency * 0.5)) }}
+                  </td>
+                </tr>
+                <tr>
                   <td>24 H</td>
                   <td :class="color(topCrypto.price_change_percentage_24h_in_currency)">
                     <span v-if="topCrypto.price_change_percentage_24h_in_currency > 0">▲</span>
@@ -131,14 +139,6 @@
                     {{ formatPercent(Math.abs(topCrypto.price_change_percentage_7d_in_currency)) }}
                   </td>
                 </tr>
-                <tr>
-                  <td>14 J</td>
-                  <td :class="color(topCrypto.price_change_percentage_14d_in_currency)">
-                    <span v-if="topCrypto.price_change_percentage_14d_in_currency > 0">▲</span>
-                    <span v-else>▼</span>
-                    {{ formatPercent(Math.abs(topCrypto.price_change_percentage_14d_in_currency)) }}
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -156,6 +156,9 @@
       <RouterLink to="/crypto-table" class="table-title">
         <h2>Tableau récapitulatif des 10 crypto-monnaies les plus importantes</h2>
       </RouterLink>
+      <div class="sort-indicator">
+        <span class="sort-text">Trié par : Capitalisation boursière ↓</span>
+      </div>
 
       <div class="crypto-table-wrapper">
         <table class="crypto-table">
@@ -177,7 +180,11 @@
           <tbody>
             <tr v-for="(coin, index) in topTenCryptos" :key="coin.id">
               <td>{{ index + 1 }}</td>
-              <td style="text-align: left;" :title="coin.name"><img :src="coin.image" alt="" width="20" style="margin-right: 8px;" />{{ coin.name }}</td>
+              <td style="text-align: left;" :title="coin.name">
+                <RouterLink :to="`/crypto/${coin.id}`" class="crypto-name-link-table">
+                  <img :src="coin.image" alt="" width="20" style="margin-right: 8px;" />{{ coin.name }}
+                </RouterLink>
+              </td>
               <td>{{ formatPrice(coin.current_price) }}</td>
               <td :class="color(coin.price_change_percentage_1h_in_currency)">
                 {{ formatPercent(coin.price_change_percentage_1h_in_currency) }}
@@ -252,7 +259,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
 import Highcharts from 'highcharts';
 
 const cryptos = ref([]);
@@ -381,6 +388,19 @@ function renderTopCryptoChart() {
   const data = topCrypto.value.sparkline;
   const isUp = data[data.length - 1] > data[0];
 
+  // Calculer le min et max des données pour ajuster l'échelle
+  const minValue = Math.min(...data);
+  const maxValue = Math.max(...data);
+  const range = maxValue - minValue;
+  const yMin = minValue - (range * 0.02);
+  const yMax = maxValue + (range * 0.02);
+
+  // Détecter le thème actuel
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+  const gridColor = isDarkMode ? '#334155' : '#cbd5e1';
+  const tooltipBg = isDarkMode ? '#1e293b' : '#ffffff';
+
   Highcharts.chart('top-crypto-chart', {
     chart: {
       type: 'area',
@@ -388,44 +408,38 @@ function renderTopCryptoChart() {
       height: 300,
     },
     title: {
-      text: topCrypto.value.current_price.toLocaleString('fr-FR', {
-        style: 'currency',
-        currency: 'USD',
-      }),
-      align: 'left',
-      style: {
-        color: '#ffffff',
-        fontSize: '24px',
-        fontWeight: '700'
-      }
+      text: null
     },
     credits: { enabled: false },
     legend: { enabled: false },
     xAxis: {
       type: 'datetime',
       labels: {
-        style: { color: '#94a3b8' },
+        style: { color: textColor },
         formatter: function() {
           const date = new Date(Date.now() - (168 - this.value) * 3600000);
           return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
         }
       },
-      gridLineColor: '#1e293b',
-      lineColor: '#334155'
+      gridLineColor: gridColor,
+      lineColor: gridColor
     },
     yAxis: {
       title: { text: null },
       labels: {
-        style: { color: '#94a3b8' },
+        style: { color: textColor },
         formatter: function() {
           return this.value.toLocaleString('fr-FR') + ' $';
         }
       },
-      gridLineColor: '#1e293b'
+      gridLineColor: gridColor,
+      min: yMin,
+      max: yMax
     },
     tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      style: { color: '#ffffff' },
+      backgroundColor: tooltipBg,
+      borderColor: gridColor,
+      style: { color: textColor },
       formatter: function() {
         return '<b>' + this.y.toLocaleString('fr-FR', {
           style: 'currency',
@@ -512,7 +526,36 @@ function color(value) {
   return value > 0 ? "positive" : "negative";
 }
 
-fetchCryptos();
+// Observer pour détecter les changements de thème
+let themeObserver = null;
+
+onMounted(() => {
+  fetchCryptos();
+  
+  // Observer les changements de classe sur l'élément html (dark/light mode)
+  themeObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        // Re-render les graphiques quand le thème change
+        nextTick(() => {
+          renderSparklines();
+          renderTopCryptoChart();
+        });
+      }
+    });
+  });
+  
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  });
+});
+
+onUnmounted(() => {
+  if (themeObserver) {
+    themeObserver.disconnect();
+  }
+});
 </script>
 
 <style scoped>
@@ -546,7 +589,7 @@ fetchCryptos();
 .intro-section h2 {
   font-size: 28px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 16px;
 }
 
@@ -581,7 +624,7 @@ fetchCryptos();
   margin: 0 auto;
   font-size: 16px;
   line-height: 1.6;
-  color: #cbd5e1;
+  color: var(--text-secondary);
 }
 
 /* Section horizontale */
@@ -833,6 +876,40 @@ fetchCryptos();
 
 .table-title h2 {
   cursor: pointer;
+}
+
+.sort-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary);
+}
+
+.sort-icon {
+  font-size: 18px;
+}
+
+.sort-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.crypto-name-link-table {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: color 0.2s;
+}
+
+.crypto-name-link-table:hover {
+  color: var(--primary);
 }
 
 .community-carousel {

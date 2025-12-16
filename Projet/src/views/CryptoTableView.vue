@@ -34,7 +34,12 @@
       <tbody>
         <tr v-for="(coin, index) in paginatedCryptos" :key="coin.id">
           <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-          <td style="text-align: left;" :title="coin.name"><img :src="coin.image" alt="" width="20" style="margin-right: 8px;" />{{ coin.name }}</td>
+          <td style="text-align: left;" :title="coin.name">
+            <RouterLink :to="'/crypto/' + coin.id" class="coin-name-link">
+              <img :src="coin.image" alt="" width="20" style="margin-right: 8px; vertical-align: middle;" />
+              <span style="vertical-align: middle;">{{ coin.name }}</span>
+            </RouterLink>
+          </td>
           <td>{{ formatPrice(coin.current_price) }}</td>
           <td :class="color(coin.price_change_percentage_1h_in_currency)">
             {{ formatPercent(coin.price_change_percentage_1h_in_currency) }}
@@ -230,3 +235,27 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.positive {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.negative {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.coin-name-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.coin-name-link:hover {
+  color: var(--primary);
+}
+</style>
