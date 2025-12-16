@@ -3,14 +3,18 @@
 
     <!-- TITRE + INTRO -->
     <section class="header-section">
+      <br/>
       <h1>Communauté</h1>
       <p class="intro-text">
         Bienvenue dans l’espace Communauté. Vous retrouverez des articles, des commentaires et vous pouvez suivre des utilisateurs.
       </p>
 
-      <button class="btn-primary publish-btn" @click="showModal = true">
+      <button v-if="userStore.isLoggedIn" class="btn-primary publish-btn" @click="showModal = true">
         Publier un article
       </button>
+      <p v-else class="text-muted">
+        Vous devez être connecté pour publier un article.
+      </p>
     </section>
 
     <!-- MODALE DE FORMULAIRE -->
@@ -33,10 +37,6 @@
         <!-- CONTENU -->
         <label>Contenu :</label>
         <textarea v-model="newContent" placeholder="Écrivez votre article..."></textarea>
-
-        <!-- PSEUDO -->
-        <label>Pseudo :</label>
-        <input type="text" v-model="newAuthor" disabled />
 
         <!-- ACTIONS -->
         <div class="modal-actions">
@@ -76,6 +76,9 @@
 
 <script setup>
 import { ref } from "vue";
+import { useUserStore } from "@/stores/userStore";
+
+const userStore = useUserStore();
 
 /* LISTE DES CRYPTOS DISPONIBLES */
 const cryptoList = [
@@ -92,35 +95,48 @@ const cryptoList = [
 const selectedCrypto = ref("Bitcoin"); // valeur par défaut
 const titleSubject = ref("");
 const newContent = ref("");
-const newAuthor = ref("toto"); // pseudo par défaut
 const showModal = ref(false);
 
-/* ARTICLES INITIAUX */
-const articles = ref([
-  { id: 1, title: "Bitcoin : Tendance à la hausse confirmée ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi" },
-  { id: 2, title: "Bitcoin : Un bon premier investissement ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi" },
-  { id: 3, title: "Ethereum : quand investir et comment ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi" },
-  { id: 4, title: "BNB : La meilleure crypto-monnaie du marché ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi" },
-  { id: 5, title: "Bitcoin : XXXXXXXXXX XXXXXXX XXXXX ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tutouuuu" },
-  { id: 6, title: "Solana : XXXXXXXXXXXXX XXXXXXXXX XXXXX", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tutu" },
-  { id: 7, title: "Solana : XXXXXXXXXX XXXXXXX XXXXX", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tutoto" },
-  { id: 8, title: "BNB : XXXXXXXXXXXXXXX XXXXXXXX", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tata" },
-]);
+/* ARTICLES PAR DÉFAUT */
+const defaultArticles = [
+  { id: 1, title: "Bitcoin : Tendance à la hausse confirmée ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi", content: "Le Bitcoin a connu une hausse significative ces dernières semaines, atteignant des sommets historiques." },
+  { id: 2, title: "Bitcoin : Un bon premier investissement ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi", content: "Le Bitcoin reste un choix populaire pour les nouveaux investisseurs, mais il est important de comprendre les risques associés." },
+  { id: 3, title: "Ethereum : quand investir et comment ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi", content: "Ethereum continue d'innover avec ses smart contracts et sa transition vers la preuve d'enjeu." },
+  { id: 4, title: "BNB : La meilleure crypto-monnaie du marché ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "titi", content: "BNB bénéficie de l'écosystème Binance et offre de nombreux avantages à ses détenteurs." },
+  { id: 5, title: "Bitcoin : XXXXXXXXXX XXXXXXX XXXXX ?", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tutouuuu", content: "Article sur Bitcoin avec des informations complémentaires." },
+  { id: 6, title: "Solana : XXXXXXXXXXXXX XXXXXXXXX XXXXX", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tutu", content: "Solana se distingue par sa rapidité et ses faibles frais de transaction." },
+  { id: 7, title: "Solana : XXXXXXXXXX XXXXXXX XXXXX", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tutoto", content: "Un autre article sur Solana explorant ses cas d'usage." },
+  { id: 8, title: "BNB : XXXXXXXXXXXXXXX XXXXXXXX", preview: "XXXXXXXXXXXX XXXXX XXXX...", author: "tata", content: "BNB continue d'évoluer dans l'écosystème crypto." },
+];
+
+/* ARTICLES CRÉÉS PAR L'UTILISATEUR */
+const userArticles = ref(JSON.parse(localStorage.getItem("userArticles") || "[]"));
+
+/* TOUS LES ARTICLES (utilisateur + défaut) */
+const articles = ref([...userArticles.value, ...defaultArticles]);
 
 /* ACTION : PUBLIER UN ARTICLE */
 const publishArticle = () => {
+  if (!userStore.isLoggedIn) {
+    alert("Vous devez être connecté pour publier un article.");
+    return;
+  }
+
   if (!titleSubject.value || !newContent.value) return;
 
   const finalTitle = `${selectedCrypto.value} : ${titleSubject.value}`;
 
-  articles.value.unshift({
-      id: Date.now(),
-      title: finalTitle,
-      content: newContent.value,
-      preview: newContent.value.slice(0, 40) + "...",
-      author: newAuthor.value,
-  });
-  localStorage.setItem("articles", JSON.stringify(articles.value));
+  const newArticle = {
+    id: Date.now(),
+    title: finalTitle,
+    content: newContent.value,
+    preview: newContent.value.slice(0, 40) + "...",
+    author: userStore.user.pseudo,
+  };
+
+  userArticles.value.unshift(newArticle);
+  articles.value.unshift(newArticle);
+  localStorage.setItem("userArticles", JSON.stringify(userArticles.value));
 
 
   // Reset
@@ -130,11 +146,6 @@ const publishArticle = () => {
 
   showModal.value = false;
 };
-
-const stored = localStorage.getItem("articles");
-if (stored) {
-  articles.value = JSON.parse(stored);
-}
 
 </script>
 
@@ -180,6 +191,10 @@ if (stored) {
   padding: 15px;
   border-radius: 10px;
   transition: 0.25s ease;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .article-card:hover {
@@ -192,6 +207,11 @@ if (stored) {
   font-weight: 700;
   color: var(--text-color);
   margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
 }
 
 /* PREVIEW */
@@ -199,12 +219,19 @@ if (stored) {
   font-size: 14px;
   color: var(--text-light);
   margin-bottom: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  flex-grow: 1;
 }
 
 /* AUTEUR */
 .author {
   font-size: 13px;
   color: var(--text-light);
+  margin-top: auto;
 }
 
 /* BOUTON VOIR PLUS */

@@ -3,8 +3,8 @@
     <div class="register-card">
 
       <h1>S’inscrire</h1>
-      <form @submit.prevent="handleRegister">
 
+      <form @submit.prevent="handleRegister">
         <label>Pseudo</label>
         <input type="text" v-model="pseudo" required />
 
@@ -18,17 +18,17 @@
         <input type="password" v-model="passwordConfirm" required />
 
         <div class="keep-connected">
-          <br/> 
+          <br/>
           <input type="checkbox" v-model="keepConnected" />
           <span> Rester connecté</span>
-          <br/> <br/> 
+          <br/><br/>
         </div>
 
         <button type="submit" class="btn-primary">S'inscrire</button>
-
       </form>
+
       <p class="login-text">
-        <br/> 
+        <br/>
         Déjà un compte ? <router-link to="/login">Se connecter ici</router-link>
       </p>
 
@@ -36,8 +36,9 @@
   </div>
 </template>
 
-
 <script>
+import { useUserStore } from "@/stores/userStore";
+
 export default {
   name: "RegisterView",
   data() {
@@ -49,18 +50,15 @@ export default {
       keepConnected: false
     };
   },
+
   methods: {
     handleRegister() {
-
       if (this.password !== this.passwordConfirm) {
         alert("Les mots de passe ne correspondent pas.");
         return;
       }
 
-      // 1) Récupérer la liste des utilisateurs existants
       const users = JSON.parse(localStorage.getItem("users")) || [];
-
-      // 2) Vérifier que l'email n'est pas déjà utilisé
       const already = users.find(u => u.email === this.email);
 
       if (already) {
@@ -68,7 +66,6 @@ export default {
         return;
       }
 
-      // 3) Ajouter l'utilisateur
       users.push({
         pseudo: this.pseudo,
         email: this.email,
@@ -76,16 +73,18 @@ export default {
         keepConnected: this.keepConnected
       });
 
-      // 4) Enregistrer dans localStorage
       localStorage.setItem("users", JSON.stringify(users));
 
-      // 5) Mettre l'utilisateur comme connecté
-      localStorage.setItem("currentUser", JSON.stringify({
-        pseudo: this.pseudo,
-        email: this.email
-      }));
+      const currentUser = { pseudo: this.pseudo, email: this.email };
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-      // 6) Redirection vers paramètres AVEC message
+      if (this.keepConnected) localStorage.setItem("keepConnected", "true");
+      else localStorage.removeItem("keepConnected");
+
+      // Pinia
+      const userStore = useUserStore();
+      userStore.login(currentUser);
+
       this.$router.push({
         name: "settings",
         query: { created: "1" }
@@ -94,4 +93,3 @@ export default {
   }
 };
 </script>
-

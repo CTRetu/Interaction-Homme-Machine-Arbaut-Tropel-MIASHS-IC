@@ -5,7 +5,6 @@
       <h1>Se connecter</h1>
 
       <form @submit.prevent="handleLogin">
-
         <label>Email</label>
         <input type="email" v-model="email" required />
 
@@ -32,9 +31,11 @@
 </template>
 
 <script>
+import { useUserStore } from "@/stores/userStore";
+
 export default {
   name: "LoginView",
-  
+
   data() {
     return {
       email: "",
@@ -45,11 +46,8 @@ export default {
 
   methods: {
     handleLogin() {
-
-      // 1. Récupérer utilisateurs stockés
       const users = JSON.parse(localStorage.getItem("users")) || [];
 
-      // 2. Vérifier si email + mdp correspondent
       const user = users.find(
         u => u.email === this.email && u.password === this.password
       );
@@ -59,20 +57,19 @@ export default {
         return;
       }
 
-      // 3. Stocker l’utilisateur connecté
-      localStorage.setItem("currentUser", JSON.stringify({
-        pseudo: user.pseudo,
-        email: user.email
-      }));
+      // currentUser localStorage
+      const currentUser = { pseudo: user.pseudo, email: user.email };
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-      // 4. Gestion du keepConnected (optionnel si tu veux l'utiliser plus tard)
-      if (this.keepConnected) {
-        localStorage.setItem("keepConnected", "true");
-      } else {
-        localStorage.removeItem("keepConnected");
-      }
+      // keepConnected
+      if (this.keepConnected) localStorage.setItem("keepConnected", "true");
+      else localStorage.removeItem("keepConnected");
 
-      // 5. Redirection après connexion
+      // Pinia
+      const userStore = useUserStore();
+      userStore.login(currentUser);
+
+      // Redirection
       this.$router.push({ name: "settings" });
     }
   }

@@ -267,21 +267,21 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
         <tr>
           <td>Gains</td>
           <td class="toggle-cell">
-            <Toggle v-model="notificationsPortfolio.gains" @change="updatePortfolioGroup" />
+            <ToggleSwitch v-model="notificationsPortfolio.gains" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
           <td>Pertes</td>
           <td class="toggle-cell">
-            <Toggle v-model="notificationsPortfolio.pertes" @change="updatePortfolioGroup" />
+            <ToggleSwitch v-model="notificationsPortfolio.pertes" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
           <td>Toutes variations</td>
           <td class="toggle-cell">
-            <Toggle v-model="notificationsPortfolio.toutes" @change="updatePortfolioGroup" />
+            <ToggleSwitch v-model="notificationsPortfolio.toutes" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
@@ -292,23 +292,23 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 
         <tr>
           <td>Recommandations d’articles</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell"><ToggleSwitch /></td>
         </tr>
         <tr>
           <td>Commentaires sous vos articles</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell"><ToggleSwitch /></td>
         </tr>
         <tr>
           <td>Réponses à vos commentaires</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell"><ToggleSwitch /></td>
         </tr>
         <tr>
           <td>Demandes de suivi</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell"><ToggleSwitch /></td>
         </tr>
         <tr>
           <td>Activités des personnes suivies</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell"><ToggleSwitch /></td>
         </tr>
 
 
@@ -319,7 +319,7 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 
         <tr>
           <td>Recommandations du jour</td>
-          <td class="toggle-cell"><Toggle /></td>
+          <td class="toggle-cell"><ToggleSwitch /></td>
         </tr>
 
       </table>
@@ -333,12 +333,12 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 </template>
 
 <script>
-import Toggle from "@/components/Toggle.vue";
+import ToggleSwitch from "@/components/ToggleSwitch.vue";
 import Highcharts from "highcharts";
 
 export default {
   name: "SettingsView",
-  components: { Toggle },
+  components: { ToggleSwitch },
 
   data() {
     return {
@@ -916,11 +916,7 @@ export default {
     goToTablePage(widgetId, page) {
       const total = this.getTotalTablePages(widgetId);
       const p = Math.min(Math.max(page, 1), total);
-      if (this.$set) {
-        this.$set(this.tablePageByWidget, widgetId, p);
-      } else {
-        this.tablePageByWidget[widgetId] = p;
-      }
+      this.tablePageByWidget[widgetId] = p;
     },
 
     changeTablePage(widgetId, delta) {
@@ -1432,3 +1428,4 @@ input {
 }
 
 </style>
+

@@ -50,7 +50,19 @@
 <script setup>
 import { ref } from "vue";
 
-const articles = ref([
+/* ICÔNES PAR DÉFAUT POUR LES CRYPTOS */
+const cryptoIcons = {
+  "Bitcoin": "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
+  "Ethereum": "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+  "BNB": "https://cryptologos.cc/logos/bnb-bnb-logo.png",
+  "Solana": "https://cryptologos.cc/logos/solana-sol-logo.png",
+  "Dogecoin": "https://cryptologos.cc/logos/dogecoin-doge-logo.png",
+  "XRP": "https://cryptologos.cc/logos/xrp-xrp-logo.png",
+  "USDC": "https://cryptologos.cc/logos/usd-coin-usdc-logo.png",
+};
+
+/* ARTICLES PERMANENTS */
+const builtInArticles = [
   { id: 1, crypto: "Bitcoin", icon: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", title: "Tendance à la hausse confirmée ?", author: "titi" },
   { id: 2, crypto: "Bitcoin", icon: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", title: "Un bon premier investissement ?", author: "titi" },
   { id: 3, crypto: "Ethereum", icon: "https://cryptologos.cc/logos/ethereum-eth-logo.png", title: "Quand investir et comment ?", author: "titoutou" },
@@ -61,7 +73,26 @@ const articles = ref([
   { id: 8, crypto: "Solana", icon: "https://cryptologos.cc/logos/solana-sol-logo.png", title: "XXXXXXXXXXXXXXXXXXXXXXXX", author: "tuti" },
   { id: 9, crypto: "XRP", icon: "https://cryptologos.cc/logos/xrp-xrp-logo.png", title: "XXXXXXXXXXXXXXXXXXXXXXXX", author: "titi" },
   { id: 10, crypto: "Dogecoin", icon: "https://cryptologos.cc/logos/dogecoin-doge-logo.png", title: "XXXXXXXXXXXXXXXXXXXX", author: "tututu" },
-]);
+];
+
+/* ARTICLES DU LOCALSTORAGE */
+const storedArticles = JSON.parse(localStorage.getItem("articles") || "[]");
+
+/* AJOUTER LES ICÔNES AUX ARTICLES STOCKÉS ET EXTRAIRE LA CRYPTO DU TITRE */
+const processedStoredArticles = storedArticles.map(article => {
+  // Extraire la crypto du titre (format: "Bitcoin : Sujet")
+  const cryptoMatch = article.title.match(/^([^:]+)\s*:/);
+  const crypto = cryptoMatch ? cryptoMatch[1].trim() : "Bitcoin";
+
+  return {
+    ...article,
+    crypto: crypto,
+    icon: cryptoIcons[crypto] || cryptoIcons["Bitcoin"]
+  };
+});
+
+/* FUSION DES ARTICLES */
+const articles = ref([...processedStoredArticles, ...builtInArticles]);
 </script>
 
 <style scoped>

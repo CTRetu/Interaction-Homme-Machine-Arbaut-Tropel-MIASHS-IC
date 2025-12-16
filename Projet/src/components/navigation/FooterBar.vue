@@ -22,13 +22,6 @@
 </script>
 
 <style scoped>
-.footer-bar {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  padding: 25px 15px;
-  margin-top: 50px;
-  transition: 0.3s ease;
-}
 
 .footer-content {
   max-width: 1400px;

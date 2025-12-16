@@ -8,6 +8,7 @@ import RegisterView from '../views/RegisterView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import CryptoTableView from '../views/CryptoTableView.vue'
 import AllArticles from '../views/AllArticles.vue'
+import SearchView from '../views/SearchView.vue'
 
 
 
@@ -21,6 +22,7 @@ export default createRouter({
     { path: '/community', name: 'community', component: CommunityView },
     { path: '/community/articles/all', name: 'all-articles', component: AllArticles },
     { path: "/community/articles/:id", name: "article-view", component: ArticleView },
+    { path: '/search', name: 'search', component: SearchView },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
 

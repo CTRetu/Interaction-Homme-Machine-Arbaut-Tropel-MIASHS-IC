@@ -9,7 +9,6 @@
       </div>
     </section>
 
-
     <!-- CHIFFRES CLÉS -->
     <section class="key-stats card">
       <h2 class="section-title">Chiffres clés</h2>
@@ -39,7 +38,6 @@
 
     <!-- GRAPHIQUE + PARAMÈTRES -->
     <section class="chart-section card">
-
       <div class="chart-area">
         <h3>Cours</h3>
         <div class="chart-placeholder">[Graphique Highcharts ici]</div>
@@ -88,7 +86,6 @@
       <h3>Convertisseur</h3>
 
       <div class="converter-grid">
-        <!-- INPUT CRYPTO -->
         <input type="number" v-model.number="amount" />
 
         <select v-model="cryptoSymbol">
@@ -97,9 +94,7 @@
           <option>SOL</option>
         </select>
 
-        <!-- RESULTAT EN USD -->
         <input type="text" :value="convertedValue" disabled />
-
         <select disabled>
           <option>$US</option>
         </select>
@@ -128,11 +123,26 @@
     <section class="card comments-section">
       <h3>Commentaires</h3>
 
-      <textarea placeholder="Se connecter pour écrire un commentaire..."></textarea>
+      <!-- CONNECTÉ -->
+      <div v-if="currentUser">
+        <textarea
+          v-model="newComment"
+          placeholder="Écrire un commentaire..."
+        ></textarea>
 
-      <div class="comment" v-for="com in comments" :key="com.id">
-        <p><strong>@{{ com.user }}</strong></p>
-        <p>{{ com.text }}</p>
+        <button class="btn-primary" @click="addComment">
+          Publier
+        </button>
+      </div>
+
+      <!-- NON CONNECTÉ -->
+      <p v-else class="text-muted">
+        Vous devez être connecté pour écrire un commentaire.
+      </p>
+
+      <div class="comment" v-for="c in comments" :key="c.id">
+        <p><strong>@{{ c.author }}</strong></p>
+        <p>{{ c.text }}</p>
       </div>
 
       <button class="btn-see-more">Voir plus</button>
@@ -144,12 +154,13 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const cryptoSymbol = ref("BTC");
+/* UTILISATEUR CONNECTÉ */
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-// Toujours Bitcoin par défaut pour l'instant
+/* CRYPTO */
+const cryptoSymbol = ref("BTC");
 const cryptoName = "Bitcoin";
 const cryptoLogo = "https://cryptologos.cc/logos/bitcoin-btc-logo.png";
-
 
 /* CHIFFRES CLÉS */
 const stats = [
@@ -159,27 +170,23 @@ const stats = [
   { label: "1 J", value: 1.02 },
   { label: "3 J", value: 1.04 },
   { label: "7 J", value: 1.05 },
-  { label: "15 J", value: 1.14 },
+  { label: "15 J", value: 1.14 }
 ];
 
-/* BUY LINKS (CLIQUABLES) */
+/* BUY LINKS */
 const buyLinks = [
   { name: "Binance", url: "https://www.binance.com" },
   { name: "Kraken", url: "https://www.kraken.com" },
-  { name: "eToro", url: "https://www.etoro.com" },
+  { name: "eToro", url: "https://www.etoro.com" }
 ];
 
-/* CONVERTISSEUR (local) */
+/* CONVERTISSEUR */
 const amount = ref(1);
-const cryptoPrices = {
-  BTC: 115990,
-  ETH: 3250,
-  SOL: 148
-};
+const cryptoPrices = { BTC: 115990, ETH: 3250, SOL: 148 };
 
 const convertedValue = computed(() => {
-  const price = cryptoPrices[cryptoSymbol.value] || 0;
-  return (amount.value * price).toLocaleString("fr-FR");
+  return (amount.value * (cryptoPrices[cryptoSymbol.value] || 0))
+    .toLocaleString("fr-FR");
 });
 
 /* CRYPTOS SIMILAIRES */
@@ -187,15 +194,34 @@ const related = [
   { name: "Ethereum", price: "3 250", evo: +1.23 },
   { name: "XRP", price: "0,56", evo: -2.56 },
   { name: "Solana", price: "148", evo: +1.56 },
-  { name: "BNB", price: "528", evo: +2.45 },
+  { name: "BNB", price: "528", evo: +2.45 }
 ];
 
-/* COMMENTAIRES */
-const comments = [
-  { id: 1, user: "tutu", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-  { id: 2, user: "gfd", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-  { id: 3, user: "qthj", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-];
+/* COMMENTAIRES (persistants par crypto) */
+const storageKey = `comments_crypto_${cryptoSymbol.value}`;
+
+const comments = ref(
+  JSON.parse(localStorage.getItem(storageKey)) || [
+    { id: 1, author: "tutu", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+    { id: 2, author: "gfd", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+    { id: 3, author: "qthj", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" }
+  ]
+);
+
+const newComment = ref("");
+
+function addComment() {
+  if (!newComment.value.trim()) return;
+
+  comments.value.push({
+    id: Date.now(),
+    author: currentUser.pseudo,
+    text: newComment.value
+  });
+
+  localStorage.setItem(storageKey, JSON.stringify(comments.value));
+  newComment.value = "";
+}
 </script>
 
 <style scoped>
