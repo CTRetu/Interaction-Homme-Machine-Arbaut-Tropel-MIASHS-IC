@@ -1,10 +1,19 @@
 ﻿<template>
   <div class="home">
+    <!-- Bandeau d’intro -->
+    <section class="intro-section">
+      <h1>TOP CRYPTO</h1>
+      <h2>Bienvenue sur Top Crypto !</h2>
+      <p>
+        Ceci est un site de visualisation des crypto-monnaies les plus importantes du marché actuel.
+      </p>
+      <h3>Améliorez vos suivis et analyses avec Top Crypto !</h3>
+    </section>
     <!-- Section : Tableau de bord (si connecté) -->
     <section v-if="userStore.isLoggedIn" class="card dashboard-section">
       <div class="dashboard-header">
         <h2>📊 Mon Tableau de Bord</h2>
-        <RouterLink to="/settings" class="dashboard-settings-link">⚙️ Personnaliser</RouterLink>
+        <RouterLink to="/settings" class="dashboard-settings-link">Personnaliser</RouterLink>
       </div>
 
       <div class="dashboard-grid">
@@ -83,18 +92,6 @@
           </div>
         </div>
       </div>
-    </section>
-
-
-
-    <!-- Bandeau d’intro -->
-    <section class="intro-section">
-      <h1>TOP CRYPTO</h1>
-      <h2>Bienvenue sur Top Crypto !</h2>
-      <p>
-        Ceci est un site de visualisation des crypto-monnaies les plus importantes du marché actuel.
-      </p>
-      <h3>Améliorez vos suivis et analyses avec Top Crypto !</h3>
     </section>
 
     <!-- Section : Gagnants / Tendance -->

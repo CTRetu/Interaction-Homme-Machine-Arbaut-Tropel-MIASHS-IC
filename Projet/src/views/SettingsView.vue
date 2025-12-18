@@ -300,7 +300,6 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
         <tr>
           <td class="notif-text">Recommandations d’articles</td>
           <td class="toggle-cell">
-            <ToggleSwitch v-model="notificationsPortfolio.toutes" @change="updatePortfolioGroup" />
             <ToggleSwitch v-model="notificationsPortfolio.recommandations_articles" @change="updatePortfolioGroup" />
           </td>
         </tr>
@@ -313,35 +312,6 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
         </tr>
 
         <tr>
-          <td>Recommandations d’articles</td>
-          <td class="toggle-cell"><ToggleSwitch /></td>
-        </tr>
-        <tr>
-          <td>Commentaires sous vos articles</td>
-          <td class="toggle-cell"><ToggleSwitch /></td>
-        </tr>
-        <tr>
-          <td>Réponses à vos commentaires</td>
-          <td class="toggle-cell"><ToggleSwitch /></td>
-        </tr>
-        <tr>
-          <td>Demandes de suivi</td>
-          <td class="toggle-cell"><ToggleSwitch /></td>
-        </tr>
-        <tr>
-          <td>Activités des personnes suivies</td>
-          <td class="toggle-cell"><ToggleSwitch /></td>
-        </tr>
-
-
-        <!-- ==== Recommandations crypto ==== -->
-        <tr>
-          <td colspan="2" class="notif-category-title">Recommandations crypto</td>
-        </tr>
-
-        <tr>
-          <td>Recommandations du jour</td>
-          <td class="toggle-cell"><ToggleSwitch /></td>
           <td class="notif-text">Réponses à vos commentaires</td>
           <td class="toggle-cell">
             <ToggleSwitch v-model="notificationsPortfolio.reponses" @change="updatePortfolioGroup" />
@@ -362,7 +332,7 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
           </td>
         </tr>
 
-        <!-- Reco crypto -->
+        <!-- Recommandations crypto -->
         <tr>
           <td colspan="2" class="notif-category-title notif-text">Recommandations crypto</td>
         </tr>
@@ -617,6 +587,25 @@ export default {
     // Écouter les changements de thème
     window.addEventListener('themeChange', this.renderAllCharts);
 
+    // Observer les changements de classe sur <html> pour re-render en mode clair/sombre
+    try {
+      this._themeObserver = new MutationObserver(mutations => {
+        for (const m of mutations) {
+          if (m.type === 'attributes' && m.attributeName === 'class') {
+            this.renderAllCharts();
+            break;
+          }
+        }
+      });
+      this._themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    } catch (e) {
+      // Fallback: au cas où MutationObserver ne serait pas disponible
+      document.addEventListener('transitionend', this.renderAllCharts, { once: false });
+    }
+
     // Initialiser les pages pour les widgets "number"
     this.dashboard.forEach(w => {
       const widget = this.allWidgets[w];
@@ -630,6 +619,10 @@ export default {
 
   beforeUnmount() {
     window.removeEventListener('themeChange', this.renderAllCharts);
+    if (this._themeObserver && typeof this._themeObserver.disconnect === 'function') {
+      this._themeObserver.disconnect();
+    }
+    document.removeEventListener('transitionend', this.renderAllCharts);
   },
 
   computed: {
@@ -821,8 +814,15 @@ export default {
 
     addWidget(widgetId) {
       if (this.addMenuIndex === -1) {
-        this.dashboard.push(widgetId);
+        // Ajout global: garder le menu ouvert pour permettre plusieurs ajouts
+        if (!this.dashboard.includes(widgetId)) {
+          this.dashboard.push(widgetId);
+        }
+        this.saveDashboard();
+        this.renderAllCharts();
+        return;
       } else if (this.addMenuIndex !== null) {
+        // Remplacement d'un slot spécifique: fermer le menu après sélection
         this.dashboard[this.addMenuIndex] = widgetId;
       }
       this.addMenuIndex = null;
@@ -889,7 +889,12 @@ export default {
       if (!el) return;
 
       const isDark = document.documentElement.classList.contains('dark');
-      const textColor = isDark ? '#f0f0f0' : '#333';
+      const textColor = isDark ? '#dcdcdc' : '#2b2b2b';
+      const titleColor = isDark ? '#e9e9e9' : '#4a3a00';
+      const gridColor = isDark ? '#666' : '#e4cfa6';
+      const labelWeight = isDark ? '600' : '700';
+      const labelSize = isDark ? '12px' : '13px';
+      const titleWeight = isDark ? '600' : '700';
 
       const widget = this.allWidgets[widgetId];
       const symbol = this.selectedCryptoByWidget[widgetId];
@@ -919,13 +924,20 @@ export default {
 
         xAxis: {
           categories,
-          title: { text: "Temps", style: { color: textColor } },
-          labels: { style: { color: textColor } }
+          title: { text: "Temps", style: { color: titleColor, fontWeight: titleWeight } },
+          labels: { style: { color: textColor, fontWeight: labelWeight, fontSize: labelSize } },
+          lineColor: gridColor,
+          tickColor: gridColor,
+          tickWidth: 1
         },
 
         yAxis: {
-          title: { text: "$US", style: { color: textColor } },
-          labels: { style: { color: textColor } }
+          title: { text: "$US", style: { color: titleColor, fontWeight: titleWeight } },
+          labels: { style: { color: textColor, fontWeight: labelWeight, fontSize: labelSize } },
+          gridLineColor: gridColor,
+          gridLineWidth: 1,
+          tickWidth: 1,
+          tickColor: gridColor
         },
 
         tooltip: {
@@ -1302,6 +1314,38 @@ input {
 }
 .add-menu-item:hover {
   background: #cf8e2f;
+}
+
+/* ------- DARK MODE (liste d'ajout) ------- */
+html.dark .dash-add,
+:root.dark .dash-add {
+  background: #2b2b2b !important;
+  border-color: #7a5600 !important;
+  color: #e9e9e9 !important;
+}
+
+html.dark .add-menu,
+:root.dark .add-menu {
+  background: #2b2b2b !important;
+  border-color: #7a5600 !important;
+  color: #e9e9e9 !important;
+}
+
+html.dark .add-menu p,
+:root.dark .add-menu p {
+  color: #f0f0f0 !important;
+}
+
+html.dark .add-menu-item,
+:root.dark .add-menu-item {
+  background: #b67500 !important;
+  color: #ffffff !important;
+  border-color: #cfa45a !important;
+}
+
+html.dark .add-menu-item:hover,
+:root.dark .add-menu-item:hover {
+  background: #cf8e2f !important;
 }
 
 /* -------- WIDGETS : TITRES -------- */
