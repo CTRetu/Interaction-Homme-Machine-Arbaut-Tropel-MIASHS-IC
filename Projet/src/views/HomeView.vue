@@ -1,5 +1,91 @@
-<template>
+﻿<template>
   <div class="home">
+    <!-- Section : Tableau de bord (si connecté) -->
+    <section v-if="userStore.isLoggedIn" class="card dashboard-section">
+      <div class="dashboard-header">
+        <h2>📊 Mon Tableau de Bord</h2>
+        <RouterLink to="/settings" class="dashboard-settings-link">⚙️ Personnaliser</RouterLink>
+      </div>
+
+      <div class="dashboard-grid">
+        <div v-for="widgetId in userDashboard" :key="widgetId" class="dashboard-slot">
+          <div class="dash-item">
+          
+            <!-- Widget Nombre -->
+            <div v-if="dashboardWidgets[widgetId]?.type === 'number'" class="widget-number">
+              <div class="widget-content">
+                <h3 class="widget-title" :title="dashboardWidgets[widgetId].title">{{ dashboardWidgets[widgetId].title }}</h3>
+                <p class="widget-value" 
+                   :class="{ 'positive': dashboardWidgets[widgetId].value.includes('+'), 'negative': dashboardWidgets[widgetId].value.includes('-') }"
+                   :title="'Valeur actuelle : ' + dashboardWidgets[widgetId].value">
+                  {{ dashboardWidgets[widgetId].value }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Widget Tableau -->
+            <div v-if="dashboardWidgets[widgetId]?.type === 'table'" class="widget-table">
+              <div class="widget-content">
+                <h3 class="widget-title" :title="dashboardWidgets[widgetId].title">{{ dashboardWidgets[widgetId].title }}</h3>
+                
+                <!-- Table avec données du portefeuille (valeur détenue par crypto) -->
+                <table v-if="dashboardWidgets[widgetId].source === 'ownedCryptos'" class="mini-table">
+                  <tbody>
+                    <tr v-for="row in getPortfolioRows()" :key="row.symbol">
+                      <td :title="'Cryptomonnaie : ' + row.name">{{ row.name }}</td>
+                      <td class="right" :title="'Valeur détenue : ' + formatPrice(row.value)">{{ formatPrice(row.value) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- Table avec données statiques -->
+                <table v-else-if="dashboardWidgets[widgetId].source === 'static'" class="mini-table">
+                  <tbody>
+                    <tr v-for="row in dashboardWidgets[widgetId].rows" :key="row.key">
+                      <td :title="'Cryptomonnaie : ' + row.label">{{ row.label }}</td>
+                      <td class="right" 
+                          :class="{ 'positive': row.value.includes('HAUSSE') || row.value.includes('ÉLEVÉE'), 'negative': row.value.includes('VOLATILITÉ') }"
+                          :title="'Recommandation : ' + row.value">
+                        {{ row.value }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Widget Graphique -->
+            <div v-if="dashboardWidgets[widgetId]?.type === 'chart'" class="widget-chart">
+              <h3 class="widget-title" :title="'Graphique : ' + dashboardWidgets[widgetId].name">{{ dashboardWidgets[widgetId].name }}</h3>
+              
+              <div class="chart-controls">
+                <label>
+                  Crypto :
+                  <select
+                    v-model="selectedCryptoByWidget[widgetId]"
+                    @change="onDashboardChartCryptoChange(widgetId)"
+                    class="crypto-select"
+                  >
+                    <option
+                      v-for="item in userPortfolio"
+                      :key="item.symbol"
+                      :value="item.id"
+                    >
+                      {{ item.symbol }}
+                    </option>
+                  </select>
+                </label>
+              </div>
+              
+              <div :id="'dashboard-chart-' + widgetId" class="dashboard-chart-container" :title="'Évolution du portefeuille'"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
 
     <!-- Bandeau d’intro -->
     <section class="intro-section">
@@ -261,7 +347,16 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
 import Highcharts from 'highcharts';
+import { useUserStore } from '@/stores/userStore';
 
+// Désactiver l'avertissement d'accessibilité Highcharts
+Highcharts.setOptions({
+  accessibility: {
+    enabled: false
+  }
+});
+
+const userStore = useUserStore();
 const cryptos = ref([]);
 
 const communityItems = ref([
@@ -294,6 +389,78 @@ const communityItems = ref([
     content: 'La diversification reste la clé dans l\'investissement crypto. Ne jamais mettre tous ses œufs dans le même panier !'
   }
 ]);
+
+// Portefeuille fictif de l'utilisateur (3 cryptos)
+const userPortfolio = ref([
+  // Quantités fictives revues pour un total ~ 1000 $US
+  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', quantity: 0.01 },
+  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', quantity: 0.1 },
+  { id: 'solana', symbol: 'SOL', name: 'Solana', quantity: 3 }
+]);
+
+// Configuration du tableau de bord (synchronisée avec le store)
+const userDashboard = computed(() => userStore.dashboardConfig);
+
+// Crypto sélectionnée par widget graphique
+const selectedCryptoByWidget = ref({});
+
+// Définition de tous les widgets (synchronisés avec SettingsView)
+const dashboardWidgets = ref({
+  gain24h: {
+    type: 'number',
+    title: 'Gains / Pertes sur 24h',
+    value: '+ 8,54 %',
+    detailType: 'change24h',
+    pageSize: 3
+  },
+  gainTotal: {
+    type: 'number',
+    title: 'Valeur du portefeuille',
+    value: '0 $US',
+    detailType: 'value',
+    pageSize: 3
+  },
+  evolution24h: {
+    type: 'chart',
+    name: 'Évolution 24h',
+    detailType: '24h'
+  },
+  performance3d: {
+    type: 'chart',
+    name: 'Performance 3 jours',
+    detailType: '3d'
+  },
+  performance7d: {
+    type: 'chart',
+    name: 'Performance 7 jours',
+    detailType: '7d'
+  },
+  investDetails: {
+    type: 'table',
+    title: 'Mes investissements',
+    source: 'ownedCryptos',
+    pageSize: 3
+  },
+  investTotal: {
+    type: 'number',
+    title: 'Total investi',
+    value: '1 000 $US',
+    detailType: 'value',
+    pageSize: 3
+  },
+  cryptoReco: {
+    type: 'table',
+    title: 'Recommandations Crypto',
+    source: 'static',
+    pageSize: 2,
+    rows: [
+      { key: 'avax', label: 'Avalanche (AVAX)', value: 'Tendance : HAUSSE' },
+      { key: 'link', label: 'Chainlink (LINK)', value: 'Tendance : FORTE HAUSSE' },
+      { key: 'dot', label: 'Polkadot (DOT)', value: 'Stabilité : ÉLEVÉE' },
+      { key: 'arb', label: 'Arbitrum (ARB)', value: 'Volatilité : ÉLEVÉE' }
+    ]
+  }
+});
 
 const topTenCryptos = computed(() => {
   return cryptos.value.slice(0, 10);
@@ -367,6 +534,10 @@ function sortCryptos() {
   nextTick(() => {
     renderSparklines();
     renderTopCryptoChart();
+    if (userStore.isLoggedIn) {
+      calculateTotalPortfolioValue();
+      renderDashboardCharts();
+    }
   });
 }
 
@@ -526,11 +697,147 @@ function color(value) {
   return value > 0 ? "positive" : "negative";
 }
 
+// Fonctions pour le tableau de bord
+function getPortfolioRows() {
+  return userPortfolio.value.map(item => {
+    const crypto = cryptos.value.find(c => c.id === item.id);
+    if (!crypto) return null;
+    
+    return {
+      symbol: item.symbol,
+      name: item.name,
+      quantity: item.quantity,
+      currentPrice: crypto.current_price,
+      value: crypto.current_price * item.quantity,
+      change24h: crypto.price_change_percentage_24h_in_currency
+    };
+  }).filter(Boolean);
+}
+
+function calculateTotalPortfolioValue() {
+  const rows = getPortfolioRows();
+  const total = rows.reduce((sum, row) => sum + row.value, 0);
+  dashboardWidgets.value.gainTotal.value = formatPrice(total);
+}
+
+function renderDashboardCharts() {
+  if (!userStore.isLoggedIn) return;
+  
+  userDashboard.value.forEach(widgetId => {
+    if (dashboardWidgets.value[widgetId]?.type === 'chart') {
+      renderSingleDashboardChart(widgetId);
+    }
+  });
+}
+
+function renderSingleDashboardChart(widgetId) {
+  const containerId = 'dashboard-chart-' + widgetId;
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  const widget = dashboardWidgets.value[widgetId];
+  if (!widget) return;
+
+  // Obtenir la crypto sélectionnée ou la première du portefeuille
+  const selectedCryptoId = selectedCryptoByWidget.value[widgetId] || userPortfolio.value[0]?.id;
+  const selectedCrypto = cryptos.value.find(c => c.id === selectedCryptoId);
+  if (!selectedCrypto) return;
+
+  let data = [];
+  let categories = [];
+  const detailType = widget.detailType;
+
+  // Récupérer les données selon la période
+  if (detailType === '24h' && selectedCrypto.sparkline_in_7d?.price) {
+    // Prendre les dernières 24 données (sur 168 points pour 7 jours)
+    const allData = selectedCrypto.sparkline_in_7d.price;
+    data = allData.slice(-24);
+    categories = Array.from({ length: 24 }, (_, i) => `${i}h`);
+  } else if (detailType === '3d' && selectedCrypto.sparkline_in_7d?.price) {
+    // Prendre les dernières 72 données (3 jours)
+    const allData = selectedCrypto.sparkline_in_7d.price;
+    data = allData.slice(-72);
+    categories = Array.from({ length: 72 }, (_, i) => `H${i}`);
+  } else if (detailType === '7d' && selectedCrypto.sparkline_in_7d?.price) {
+    // Prendre 7 points représentatifs sur 7 jours
+    const allData = selectedCrypto.sparkline_in_7d.price;
+    const step = Math.floor(allData.length / 7);
+    data = Array.from({ length: 7 }, (_, i) => allData[i * step]);
+    categories = ['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7'];
+  } else {
+    return; // Pas de données disponibles
+  }
+
+  const isUp = data.length > 0 && data[data.length - 1] > data[0];
+  
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+  const gridColor = isDarkMode ? '#334155' : '#cbd5e1';
+
+  Highcharts.chart(containerId, {
+    chart: {
+      type: 'line',
+      backgroundColor: 'transparent',
+      height: 220,
+      margin: [15, 15, 45, 60]
+    },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: {
+      categories: categories,
+      visible: true,
+      lineColor: gridColor,
+      tickColor: gridColor,
+      labels: {
+        style: { color: textColor }
+      }
+    },
+    yAxis: {
+      visible: true,
+      gridLineColor: gridColor,
+      title: { text: '$US', style: { color: textColor } },
+      labels: {
+        style: { color: textColor }
+      }
+    },
+    tooltip: {
+      enabled: true,
+      backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+      style: { color: textColor },
+      valueDecimals: 2,
+      valueSuffix: ' $US'
+    },
+    plotOptions: {
+      series: {
+        lineWidth: 2,
+        marker: { enabled: false },
+        color: isUp ? '#16a34a' : '#dc2626'
+      }
+    },
+    series: [{
+      name: selectedCrypto.symbol.toUpperCase(),
+      data: data
+    }]
+  });
+}
+
+function onDashboardChartCryptoChange(widgetId) {
+  renderSingleDashboardChart(widgetId);
+}
+
 // Observer pour détecter les changements de thème
 let themeObserver = null;
 
 onMounted(() => {
   fetchCryptos();
+  
+  // Initialiser les cryptos sélectionnées pour les graphiques
+  userDashboard.value.forEach(widgetId => {
+    if (dashboardWidgets.value[widgetId]?.type === 'chart') {
+      selectedCryptoByWidget.value[widgetId] = userPortfolio.value[0]?.id || 'bitcoin';
+    }
+  });
   
   // Observer les changements de classe sur l'élément html (dark/light mode)
   themeObserver = new MutationObserver((mutations) => {
@@ -540,6 +847,7 @@ onMounted(() => {
         nextTick(() => {
           renderSparklines();
           renderTopCryptoChart();
+          renderDashboardCharts();
         });
       }
     });

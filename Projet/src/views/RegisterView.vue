@@ -18,10 +18,8 @@
         <input type="password" v-model="passwordConfirm" required />
 
         <div class="keep-connected">
-          <br/> 
-          <input type="checkbox" v-model="keepConnected" />
-          <span> Rester connecté</span>
-          <br/> <br/> 
+          <input type="checkbox" v-model="keepConnected" id="keepConnectedRegister" />
+          <label for="keepConnectedRegister">Rester connecté</label>
         </div>
 
         <button type="submit" class="btn-primary">S'inscrire</button>

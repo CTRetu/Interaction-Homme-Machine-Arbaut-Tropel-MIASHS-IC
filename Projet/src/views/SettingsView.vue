@@ -247,9 +247,9 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
       <p class="hint">Les notifications se font uniquement par email.</p>
 
       <table class="notif-table">
-
-        <!-- Gestion globale -->
-        <tr>
+        <tbody>
+          <!-- Gestion globale -->
+          <tr>
           <td class="notif-category-title notif-text">Gestion de toutes les notifications</td>
           <td>
             <div class="toggle-cell">
@@ -349,7 +349,7 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
             <Toggle v-model="notificationsPortfolio.recommandations_crypto" @change="updatePortfolioGroup" />
           </td>
         </tr>
-
+        </tbody>
       </table>
     </section>
 
@@ -363,10 +363,16 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 <script>
 import Toggle from "@/components/Toggle.vue";
 import Highcharts from "highcharts";
+import { useUserStore } from '@/stores/userStore';
 
 export default {
   name: "SettingsView",
   components: { Toggle },
+  
+  setup() {
+    const userStore = useUserStore();
+    return { userStore };
+  },
 
   data() {
     return {
@@ -391,15 +397,16 @@ export default {
 
       // Cryptos possédées (données fictives)
       ownedCryptos: [
-        { symbol: "BTC", name: "Bitcoin", value: 1250, change24h: 53 },
-        { symbol: "ETH", name: "Ethereum", value: 820, change24h: 21 },
-        { symbol: "SOL", name: "Solana", value: 560, change24h: -12 },
-        { symbol: "BNB", name: "BNB", value: 320, change24h: 6 },
-        { symbol: "ADA", name: "Cardano", value: 160, change24h: -3 },
-        { symbol: "XRP", name: "XRP", value: 110, change24h: 1 },
-        { symbol: "AVAX", name: "Avalanche", value: 350, change24h: 14 },
-        { symbol: "DOT", name: "Polkadot", value: 190, change24h: 4 },
-        { symbol: "MATIC", name: "Polygon", value: 140, change24h: -2 }
+        // Valeurs fictives revues pour un total proche de 1 000 $US
+        { symbol: "BTC", name: "Bitcoin", value: 400, change24h: 53 },
+        { symbol: "ETH", name: "Ethereum", value: 250, change24h: 21 },
+        { symbol: "SOL", name: "Solana", value: 150, change24h: -12 },
+        { symbol: "BNB", name: "BNB", value: 80, change24h: 6 },
+        { symbol: "ADA", name: "Cardano", value: 60, change24h: -3 },
+        { symbol: "XRP", name: "XRP", value: 40, change24h: 1 },
+        { symbol: "AVAX", name: "Avalanche", value: 20, change24h: 14 },
+        { symbol: "DOT", name: "Polkadot", value: 30, change24h: 4 },
+        { symbol: "MATIC", name: "Polygon", value: 20, change24h: -2 }
       ],
 
       // Widgets configurables
@@ -414,7 +421,7 @@ export default {
         gainTotal: {
           type: "number",
           title: "Gains / Pertes totales",
-          value: "+ 3 240 $US",
+          value: "+ 120 $US",
           detailType: "value",
           pageSize: 3
         },
@@ -442,7 +449,7 @@ export default {
         investTotal: {
           type: "number",
           title: "Total investi",
-          value: "2 800 $US",
+          value: "1 000 $US",
           detailType: "value",
           pageSize: 3
         },
@@ -565,10 +572,9 @@ export default {
       this.userEmail = current.email;
     }
 
-    // Charger un dashboard sauvegardé s'il existe
-    const savedDash = JSON.parse(localStorage.getItem("dashboard"));
-    if (savedDash && Array.isArray(savedDash) && savedDash.length > 0) {
-      this.dashboard = savedDash;
+    // Charger le dashboard depuis le store Pinia
+    if (this.userStore.dashboardConfig && this.userStore.dashboardConfig.length > 0) {
+      this.dashboard = [...this.userStore.dashboardConfig];
     }
 
     // Générer des données fictives pour les graphiques
@@ -781,7 +787,8 @@ export default {
 
     /* ---------- Gestion dashboard ---------- */
     saveDashboard() {
-      localStorage.setItem("dashboard", JSON.stringify(this.dashboard));
+      // Sauvegarder dans le store Pinia (qui synchronise avec localStorage)
+      this.userStore.updateDashboardConfig(this.dashboard);
     },
 
     openAddMenu(index) {

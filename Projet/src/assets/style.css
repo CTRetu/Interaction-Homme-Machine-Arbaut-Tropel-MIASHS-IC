@@ -551,22 +551,52 @@ form input[type="password"] {
   padding: 10px;
   margin-top: 5px;
   border-radius: 8px;
-  border: 1px solid var(--border-color);  /* ⚡ thème */
-  background: var(--bg-secondary);        /* ⚡ thème */
-  color: var(--text-color);               /* ⚡ thème */
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary); 
+  color: var(--text-color); 
 }
 
 form input::placeholder {
-  color: var(--text-light);               /* ⚡ thème */
+  color: var(--text-light); 
 }
 
+.keep-connected {
+  display: inline-flex;        /* shrink to content width */
+  align-items: center;
+  gap: 0;
+  margin: 10px 0;
+  margin-left: auto;           /* push the group to the right */
+}
+
+.keep-connected input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* prevent children from stretching and causing big gaps */
+.keep-connected input[type="checkbox"],
+.keep-connected label {
+  flex: 0 0 auto;
+}
+
+.keep-connected label {
+  margin-top: 0; /* override global form label margin */
+  margin-left: 2px; /* tiny space between box and text */
+  display: inline-flex;
+  align-items: center; /* ensure perfect vertical alignment with checkbox */
+  line-height: 1;      /* avoid extra vertical offset */
+}
+
+.keep-connected label,
 .keep-connected span {
-  color: var(--text-color);               /* ⚡ thème */
+  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
 }
 
 .btn-primary {
   width: 100%;
-  background: var(--primary);             /* ⚡ thème */
+  background: var(--primary);
   color: white;
   padding: 12px;
   font-size: 16px;
@@ -747,6 +777,32 @@ input {
   color: #d18c00;
 }
 
+/* -------- DASHBOARD HEADER -------- */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+}
+
+.dashboard-settings-link {
+  color: white;
+  font-size: 14px;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--primary);
+  transition: background 0.3s;
+}
+
+.dashboard-settings-link:hover {
+  background: var(--primary-hover);
+}
+
 /* -------- DASHBOARD GRID -------- */
 .dashboard-grid {
   display: grid;
@@ -755,7 +811,7 @@ input {
 }
 
 .dashboard-slot {
-  height: 210px;
+  height: 300px;
   position: relative;
 }
 
@@ -800,6 +856,7 @@ input {
 .widget-content {
   flex: 1;
   overflow: hidden; /* Prevent overflow */
+  height: 100%;
 }
 
 .table-pagination {
@@ -1217,17 +1274,27 @@ html.dark .sort-container select {
 /* -------- WIDGET NUMBER -------- */
 .widget-number {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* center vertically within content area */
+  height: 100%;            /* fill available height to allow vertical centering */
+  position: relative;      /* enable absolute centering of value */
 }
 
 .widget-value {
-  font-size: 30px;
+  font-size: 42px;
   font-weight: bold;
-  margin: 8px 0;
+  margin: 0; /* avoid shifting when absolutely centered */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .mini-table {
   width: 100%;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .mini-table td {
@@ -1241,6 +1308,7 @@ html.dark .sort-container select {
 /* -------- WIDGET TABLE -------- */
 .widget-table table {
   width: 100%;
+  font-size: 16px;
 }
 .widget-table td {
   border-bottom: 1px solid #e4cfa6;
