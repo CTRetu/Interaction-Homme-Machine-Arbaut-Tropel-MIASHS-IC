@@ -58,7 +58,7 @@ const builtInArticles = [
 ];
 
 /* ARTICLES DU LOCALSTORAGE (seulement les articles créés par l'utilisateur) */
-const storedArticles = JSON.parse(localStorage.getItem("userArticles") || "[]");
+const storedArticles = JSON.parse(localStorage.getItem("articles") || "[]");
 
 /* TOUS LES ARTICLES (articles par défaut + articles utilisateur) */
 const allArticles = ref([...storedArticles, ...builtInArticles]);

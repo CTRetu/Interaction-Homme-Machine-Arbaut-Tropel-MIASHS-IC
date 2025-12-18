@@ -120,8 +120,8 @@ function addComment() {
 <style scoped>
 .article-view {
   padding: 20px 40px;
-  max-width: 1400px;
-  width: 100%;
+  max-width: 900px;
+  width: 900px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;

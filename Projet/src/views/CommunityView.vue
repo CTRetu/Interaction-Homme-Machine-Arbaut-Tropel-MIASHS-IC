@@ -110,7 +110,7 @@ const defaultArticles = [
 ];
 
 /* ARTICLES CRÉÉS PAR L'UTILISATEUR */
-const userArticles = ref(JSON.parse(localStorage.getItem("userArticles") || "[]"));
+const userArticles = ref(JSON.parse(localStorage.getItem("articles") || "[]"));
 
 /* TOUS LES ARTICLES (utilisateur + défaut) */
 const articles = ref([...userArticles.value, ...defaultArticles]);
@@ -136,7 +136,7 @@ const publishArticle = () => {
 
   userArticles.value.unshift(newArticle);
   articles.value.unshift(newArticle);
-  localStorage.setItem("userArticles", JSON.stringify(userArticles.value));
+  localStorage.setItem("articles", JSON.stringify(userArticles.value));
 
 
   // Reset

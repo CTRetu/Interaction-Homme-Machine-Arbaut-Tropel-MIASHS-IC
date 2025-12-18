@@ -543,7 +543,8 @@ function renderCoursChart() {
     chart: {
       type: 'area',
       backgroundColor: 'transparent',
-      height: 300,
+      height: 380,
+      marginBottom: 60,
     },
     title: { text: null },
     credits: { enabled: false },
@@ -624,7 +625,8 @@ function renderTradingChart() {
   Highcharts.chart('crypto-detail-chart', {
     chart: {
       backgroundColor: 'transparent',
-      height: 300,
+      height: 380,
+      marginBottom: 60,
     },
     title: { text: null },
     credits: { enabled: false },
@@ -679,7 +681,8 @@ function renderVolumeChart() {
     chart: {
       type: 'column',
       backgroundColor: 'transparent',
-      height: 300,
+      height: 380,
+      marginBottom: 60,
     },
     title: { text: null },
     credits: { enabled: false },
@@ -730,7 +733,8 @@ function renderCapitalizationChart() {
     chart: {
       type: 'area',
       backgroundColor: 'transparent',
-      height: 300,
+      height: 380,
+      marginBottom: 60,
     },
     title: { text: null },
     credits: { enabled: false },
@@ -863,7 +867,8 @@ function renderPredictionChart() {
     chart: {
       type: 'line',
       backgroundColor: 'transparent',
-      height: 300,
+      height: 380,
+      marginBottom: 60,
     },
     title: { text: null },
     credits: { enabled: false },
@@ -1143,7 +1148,7 @@ watch(() => route.params.id, async (newId) => {
 }
 
 .chart-placeholder {
-  height: 260px;
+  height: 380px;
   border: 2px dashed #666;
   background: #2a2a2a;
   border-radius: 10px;

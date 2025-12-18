@@ -601,7 +601,7 @@ export default {
         attributes: true,
         attributeFilter: ['class']
       });
-    } catch (e) {
+    } catch {
       // Fallback: au cas où MutationObserver ne serait pas disponible
       document.addEventListener('transitionend', this.renderAllCharts, { once: false });
     }
@@ -679,6 +679,9 @@ export default {
       const index = users.findIndex(u => u.email === current.email);
       if (index === -1) return;
 
+      const oldPseudo = current.pseudo;
+      const newPseudo = this.userPseudo;
+
       users[index].pseudo = this.userPseudo;
       users[index].email = this.userEmail;
 
@@ -694,6 +697,34 @@ export default {
           email: this.userEmail
         })
       );
+
+      // Mettre à jour le pseudo dans tous les articles de l'utilisateur
+      if (oldPseudo !== newPseudo) {
+        let articles = JSON.parse(localStorage.getItem("articles") || "[]");
+        articles = articles.map(article => {
+          if (article.author === oldPseudo) {
+            article.author = newPseudo;
+          }
+          return article;
+        });
+        localStorage.setItem("articles", JSON.stringify(articles));
+
+        // Mettre à jour le pseudo dans tous les commentaires
+        // Parcourir tous les commentaires stockés (format: comments_article_X)
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("comments_article_")) {
+            let comments = JSON.parse(localStorage.getItem(key) || "[]");
+            comments = comments.map(comment => {
+              if (comment.author === oldPseudo) {
+                comment.author = newPseudo;
+              }
+              return comment;
+            });
+            localStorage.setItem(key, JSON.stringify(comments));
+          }
+        }
+      }
 
       this.newPassword = "";
       this.editing = false;
