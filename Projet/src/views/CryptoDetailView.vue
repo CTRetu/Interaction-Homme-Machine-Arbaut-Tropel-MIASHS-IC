@@ -1,11 +1,11 @@
 <template>
   <div class="crypto-detail">
-
+    <br/>
     <!-- TITRE + LOGO -->
     <section class="header-section">
       <div class="title-row">
-        <h1>{{ cryptoName }}</h1>
-        <img :src="cryptoLogo" alt="logo" class="crypto-logo" />
+        <h1>{{ cryptoData.name || 'Chargement...' }}</h1>
+        <img v-if="cryptoData.image" :src="cryptoData.image" alt="logo" class="crypto-logo" />
       </div>
     </section>
 
@@ -14,22 +14,128 @@
       <h2 class="section-title">Chiffres clés</h2>
 
       <div class="stats-grid">
-        <div v-for="item in stats" :key="item.label" class="stat-item">
-          <span class="label">{{ item.label }}</span>
-
+        <div class="stat-item">
+          <span class="label">1 H</span>
           <div class="stat-value">
             <span
-              :class="{ up: item.value > 0, down: item.value < 0 }"
+              :class="{ up: cryptoData.price_change_percentage_1h_in_currency > 0, down: cryptoData.price_change_percentage_1h_in_currency < 0 }"
               class="value"
             >
-              {{ item.value > 0 ? '+' : '' }}{{ item.value }}%
+              {{ cryptoData.price_change_percentage_1h_in_currency > 0 ? '+' : '' }}{{ formatPercent(cryptoData.price_change_percentage_1h_in_currency) }}
             </span>
-
             <span
               class="arrow"
-              :class="{ up: item.value > 0, down: item.value < 0 }"
+              :class="{ up: cryptoData.price_change_percentage_1h_in_currency > 0, down: cryptoData.price_change_percentage_1h_in_currency < 0 }"
             >
-              {{ item.value > 0 ? '▲' : '▼' }}
+              {{ cryptoData.price_change_percentage_1h_in_currency > 0 ? '▲' : '▼' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <span class="label">6 H</span>
+          <div class="stat-value">
+            <span
+              :class="{ up: (cryptoData.price_change_percentage_24h_in_currency * 0.25) > 0, down: (cryptoData.price_change_percentage_24h_in_currency * 0.25) < 0 }"
+              class="value"
+            >
+              {{ (cryptoData.price_change_percentage_24h_in_currency * 0.25) > 0 ? '+' : '' }}{{ formatPercent(cryptoData.price_change_percentage_24h_in_currency * 0.25) }}
+            </span>
+            <span
+              class="arrow"
+              :class="{ up: (cryptoData.price_change_percentage_24h_in_currency * 0.25) > 0, down: (cryptoData.price_change_percentage_24h_in_currency * 0.25) < 0 }"
+            >
+              {{ (cryptoData.price_change_percentage_24h_in_currency * 0.25) > 0 ? '▲' : '▼' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <span class="label">12 H</span>
+          <div class="stat-value">
+            <span
+              :class="{ up: (cryptoData.price_change_percentage_24h_in_currency * 0.5) > 0, down: (cryptoData.price_change_percentage_24h_in_currency * 0.5) < 0 }"
+              class="value"
+            >
+              {{ (cryptoData.price_change_percentage_24h_in_currency * 0.5) > 0 ? '+' : '' }}{{ formatPercent(cryptoData.price_change_percentage_24h_in_currency * 0.5) }}
+            </span>
+            <span
+              class="arrow"
+              :class="{ up: (cryptoData.price_change_percentage_24h_in_currency * 0.5) > 0, down: (cryptoData.price_change_percentage_24h_in_currency * 0.5) < 0 }"
+            >
+              {{ (cryptoData.price_change_percentage_24h_in_currency * 0.5) > 0 ? '▲' : '▼' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <span class="label">1 J</span>
+          <div class="stat-value">
+            <span
+              :class="{ up: cryptoData.price_change_percentage_24h_in_currency > 0, down: cryptoData.price_change_percentage_24h_in_currency < 0 }"
+              class="value"
+            >
+              {{ cryptoData.price_change_percentage_24h_in_currency > 0 ? '+' : '' }}{{ formatPercent(cryptoData.price_change_percentage_24h_in_currency) }}
+            </span>
+            <span
+              class="arrow"
+              :class="{ up: cryptoData.price_change_percentage_24h_in_currency > 0, down: cryptoData.price_change_percentage_24h_in_currency < 0 }"
+            >
+              {{ cryptoData.price_change_percentage_24h_in_currency > 0 ? '▲' : '▼' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <span class="label">3 J</span>
+          <div class="stat-value">
+            <span
+              :class="{ up: (cryptoData.price_change_percentage_7d_in_currency * 0.43) > 0, down: (cryptoData.price_change_percentage_7d_in_currency * 0.43) < 0 }"
+              class="value"
+            >
+              {{ (cryptoData.price_change_percentage_7d_in_currency * 0.43) > 0 ? '+' : '' }}{{ formatPercent(cryptoData.price_change_percentage_7d_in_currency * 0.43) }}
+            </span>
+            <span
+              class="arrow"
+              :class="{ up: (cryptoData.price_change_percentage_7d_in_currency * 0.43) > 0, down: (cryptoData.price_change_percentage_7d_in_currency * 0.43) < 0 }"
+            >
+              {{ (cryptoData.price_change_percentage_7d_in_currency * 0.43) > 0 ? '▲' : '▼' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <span class="label">7 J</span>
+          <div class="stat-value">
+            <span
+              :class="{ up: cryptoData.price_change_percentage_7d_in_currency > 0, down: cryptoData.price_change_percentage_7d_in_currency < 0 }"
+              class="value"
+            >
+              {{ cryptoData.price_change_percentage_7d_in_currency > 0 ? '+' : '' }}{{ formatPercent(cryptoData.price_change_percentage_7d_in_currency) }}
+            </span>
+            <span
+              class="arrow"
+              :class="{ up: cryptoData.price_change_percentage_7d_in_currency > 0, down: cryptoData.price_change_percentage_7d_in_currency < 0 }"
+            >
+              {{ cryptoData.price_change_percentage_7d_in_currency > 0 ? '▲' : '▼' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <span class="label">15 J</span>
+          <div class="stat-value">
+            <span
+              :class="{ up: cryptoData.price_change_percentage_14d_in_currency > 0, down: cryptoData.price_change_percentage_14d_in_currency < 0 }"
+              class="value"
+            >
+              {{ cryptoData.price_change_percentage_14d_in_currency > 0 ? '+' : '' }}{{ formatPercent(cryptoData.price_change_percentage_14d_in_currency) }}
+            </span>
+            <span
+              class="arrow"
+              :class="{ up: cryptoData.price_change_percentage_14d_in_currency > 0, down: cryptoData.price_change_percentage_14d_in_currency < 0 }"
+            >
+              {{ cryptoData.price_change_percentage_14d_in_currency > 0 ? '▲' : '▼' }}
             </span>
           </div>
         </div>
@@ -38,32 +144,64 @@
 
     <!-- GRAPHIQUE + PARAMÈTRES -->
     <section class="chart-section card">
+
       <div class="chart-area">
-        <h3>Cours</h3>
-        <div class="chart-placeholder">[Graphique Highcharts ici]</div>
+        <div class="chart-tabs">
+          <button
+            :class="['chart-tab', { active: activeTab === 'cours' }]"
+            @click="activeTab = 'cours'; renderChart();"
+          >
+            Cours
+          </button>
+          <button
+            :class="['chart-tab', { active: activeTab === 'trading' }]"
+            @click="activeTab = 'trading'; renderChart();"
+          >
+            Trading View
+          </button>
+          <button
+            :class="['chart-tab', { active: activeTab === 'volume' }]"
+            @click="activeTab = 'volume'; renderChart();"
+          >
+            Volume
+          </button>
+          <button
+            :class="['chart-tab', { active: activeTab === 'capitalisation' }]"
+            @click="activeTab = 'capitalisation'; renderChart();"
+          >
+            Capitalisation
+          </button>
+          <button
+            :class="['chart-tab', { active: activeTab === 'prediction' }]"
+            @click="activeTab = 'prediction'; renderChart();"
+          >
+            Prédiction
+          </button>
+        </div>
+        <div id="crypto-detail-chart" class="chart-placeholder"></div>
       </div>
 
       <div class="chart-params">
         <h3>Paramètres</h3>
 
         <label>Période :</label>
-        <select>
-          <option>1 semaine</option>
-          <option>1 mois</option>
-          <option>1 an</option>
+        <select v-model="period" @change="updateChart">
+          <option value="7">1 semaine</option>
+          <option value="30">1 mois</option>
+          <option value="365">1 an</option>
         </select>
 
         <label>Comparaison :</label>
-        <select>
-          <option>Aucune</option>
-          <option>BTC</option>
-          <option>ETH</option>
+        <select v-model="comparison" @change="updateChart">
+          <option value="">Aucune</option>
+          <option value="ethereum">Ethereum</option>
+          <option value="binancecoin">BNB</option>
         </select>
 
         <label>Devise :</label>
-        <select>
-          <option>$US</option>
-          <option>€ EUR</option>
+        <select v-model="currency" @change="updateChart">
+          <option value="usd">$US</option>
+          <option value="eur">€ EUR</option>
         </select>
       </div>
     </section>
@@ -86,17 +224,19 @@
       <h3>Convertisseur</h3>
 
       <div class="converter-grid">
+        <!-- INPUT CRYPTO -->
         <input type="number" v-model.number="amount" />
 
-        <select v-model="cryptoSymbol">
-          <option>BTC</option>
-          <option>ETH</option>
-          <option>SOL</option>
+        <select disabled>
+          <option>{{ cryptoData.symbol?.toUpperCase() || 'BTC' }}</option>
         </select>
 
+        <!-- RESULTAT EN DEVISE -->
         <input type="text" :value="convertedValue" disabled />
-        <select disabled>
-          <option>$US</option>
+
+        <select v-model="currency" @change="updateChart">
+          <option value="usd">$US</option>
+          <option value="eur">€ EUR</option>
         </select>
       </div>
     </section>
@@ -106,13 +246,13 @@
       <h3>Cryptos similaires</h3>
 
       <div class="crypto-cards">
-        <div class="mini-card" v-for="item in related" :key="item.name">
+        <div class="mini-card" v-for="item in relatedCryptos" :key="item.id">
           <h4>{{ item.name }}</h4>
-          <p>{{ item.price }} $US</p>
-          <span :class="{ up: item.evo > 0, down: item.evo < 0 }">
-            {{ item.evo > 0 ? '+' : '' }}{{ item.evo }}%
+          <p>{{ formatPrice(item.current_price) }}</p>
+          <span :class="{ up: item.price_change_percentage_24h_in_currency > 0, down: item.price_change_percentage_24h_in_currency < 0 }">
+            {{ item.price_change_percentage_24h_in_currency > 0 ? '+' : '' }}{{ formatPercent(item.price_change_percentage_24h_in_currency) }}
           </span>
-          <div class="mini-chart">[Mini Chart]</div>
+          <div :id="'mini-spark-' + item.id" class="mini-chart"></div>
         </div>
       </div>
 
@@ -123,26 +263,11 @@
     <section class="card comments-section">
       <h3>Commentaires</h3>
 
-      <!-- CONNECTÉ -->
-      <div v-if="currentUser">
-        <textarea
-          v-model="newComment"
-          placeholder="Écrire un commentaire..."
-        ></textarea>
+      <textarea placeholder="Se connecter pour écrire un commentaire..."></textarea>
 
-        <button class="btn-primary" @click="addComment">
-          Publier
-        </button>
-      </div>
-
-      <!-- NON CONNECTÉ -->
-      <p v-else class="text-muted">
-        Vous devez être connecté pour écrire un commentaire.
-      </p>
-
-      <div class="comment" v-for="c in comments" :key="c.id">
-        <p><strong>@{{ c.author }}</strong></p>
-        <p>{{ c.text }}</p>
+      <div class="comment" v-for="com in comments" :key="com.id">
+        <p><strong>@{{ com.user }}</strong></p>
+        <p>{{ com.text }}</p>
       </div>
 
       <button class="btn-see-more">Voir plus</button>
@@ -152,76 +277,702 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { useRoute } from "vue-router";
+import Highcharts from "highcharts/highstock";
 
-/* UTILISATEUR CONNECTÉ */
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+const route = useRoute();
 
-/* CRYPTO */
-const cryptoSymbol = ref("BTC");
-const cryptoName = "Bitcoin";
-const cryptoLogo = "https://cryptologos.cc/logos/bitcoin-btc-logo.png";
+// Paramètres du graphique
+const period = ref("7");
+const comparison = ref("");
+const currency = ref("usd");
+const amount = ref(1);
+const activeTab = ref("cours");
 
-/* CHIFFRES CLÉS */
-const stats = [
-  { label: "1 H", value: 1.19 },
-  { label: "6 H", value: 1.13 },
-  { label: "12 H", value: 1.23 },
-  { label: "1 J", value: 1.02 },
-  { label: "3 J", value: 1.04 },
-  { label: "7 J", value: 1.05 },
-  { label: "15 J", value: 1.14 }
-];
+// Données de la crypto
+const cryptoData = ref({
+  name: '',
+  symbol: '',
+  image: '',
+  current_price: 0,
+  price_change_percentage_1h_in_currency: 0,
+  price_change_percentage_24h_in_currency: 0,
+  price_change_percentage_7d_in_currency: 0,
+  price_change_percentage_14d_in_currency: 0,
+});
 
-/* BUY LINKS */
+const chartData = ref([]);
+const comparisonChartData = ref([]);
+const volumeData = ref([]);
+const marketCapData = ref([]);
+const predictionData = ref([]);
+const relatedCryptos = ref([]);
+
+/* BUY LINKS (CLIQUABLES) */
 const buyLinks = [
   { name: "Binance", url: "https://www.binance.com" },
   { name: "Kraken", url: "https://www.kraken.com" },
-  { name: "eToro", url: "https://www.etoro.com" }
+  { name: "eToro", url: "https://www.etoro.com" },
+];
+
+/* COMMENTAIRES */
+const comments = [
+  { id: 1, user: "tutu", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+  { id: 2, user: "gfd", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+  { id: 3, user: "qthj", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
 ];
 
 /* CONVERTISSEUR */
-const amount = ref(1);
-const cryptoPrices = { BTC: 115990, ETH: 3250, SOL: 148 };
-
 const convertedValue = computed(() => {
-  return (amount.value * (cryptoPrices[cryptoSymbol.value] || 0))
-    .toLocaleString("fr-FR");
+  const price = cryptoData.value.current_price || 0;
+  const convertedAmount = amount.value * price;
+  return convertedAmount.toLocaleString("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 });
 
-/* CRYPTOS SIMILAIRES */
-const related = [
-  { name: "Ethereum", price: "3 250", evo: +1.23 },
-  { name: "XRP", price: "0,56", evo: -2.56 },
-  { name: "Solana", price: "148", evo: +1.56 },
-  { name: "BNB", price: "528", evo: +2.45 }
-];
+// Récupérer l'ID de la crypto depuis l'URL
+const cryptoId = computed(() => route.params.id || 'bitcoin');
 
-/* COMMENTAIRES (persistants par crypto) */
-const storageKey = `comments_crypto_${cryptoSymbol.value}`;
+// Récupérer les données de la crypto
+async function fetchCryptoData() {
+  try {
+    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency.value}&ids=${cryptoId.value}&order=market_cap_desc&per_page=1&page=1&sparkline=true&price_change_percentage=1h,24h,7d,14d`;
 
-const comments = ref(
-  JSON.parse(localStorage.getItem(storageKey)) || [
-    { id: 1, author: "tutu", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-    { id: 2, author: "gfd", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-    { id: 3, author: "qthj", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" }
-  ]
-);
+    const res = await fetch(url);
+    const data = await res.json();
 
-const newComment = ref("");
+    if (data && data.length > 0) {
+      cryptoData.value = data[0];
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données:', error);
+  }
+}
 
-function addComment() {
-  if (!newComment.value.trim()) return;
+// Récupérer les données historiques pour le graphique
+async function fetchChartData() {
+  try {
+    const url = `https://api.coingecko.com/api/v3/coins/${cryptoId.value}/market_chart?vs_currency=${currency.value}&days=${period.value}`;
 
-  comments.value.push({
-    id: Date.now(),
-    author: currentUser.pseudo,
-    text: newComment.value
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data && data.prices) {
+      chartData.value = data.prices.map(([timestamp, price]) => [timestamp, price]);
+    }
+
+    if (data && data.total_volumes) {
+      volumeData.value = data.total_volumes.map(([timestamp, volume]) => [timestamp, volume]);
+    }
+
+    if (data && data.market_caps) {
+      marketCapData.value = data.market_caps.map(([timestamp, cap]) => [timestamp, cap]);
+    }
+
+    // Calculer la prédiction basée sur les données historiques
+    if (chartData.value.length > 0) {
+      calculatePrediction();
+    }
+
+    // Si comparaison activée, récupérer aussi les données de comparaison
+    if (comparison.value) {
+      const compUrl = `https://api.coingecko.com/api/v3/coins/${comparison.value}/market_chart?vs_currency=${currency.value}&days=${period.value}`;
+      const compRes = await fetch(compUrl);
+      const compData = await compRes.json();
+
+      if (compData && compData.prices) {
+        comparisonChartData.value = compData.prices.map(([timestamp, price]) => [timestamp, price]);
+      }
+    } else {
+      comparisonChartData.value = [];
+    }
+
+    nextTick(() => {
+      renderChart();
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération du graphique:', error);
+  }
+}
+
+// Récupérer les cryptos similaires
+async function fetchRelatedCryptos() {
+  try {
+    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency.value}&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data && data.length > 0) {
+      // Trouver l'index de la crypto actuelle
+      const currentIndex = data.findIndex(c => c.id === cryptoId.value);
+
+      // Prendre 6 cryptos proches de la crypto actuelle
+      let related = [];
+      if (currentIndex !== -1) {
+        const start = Math.max(0, currentIndex - 3);
+        const end = Math.min(data.length, currentIndex + 4);
+        related = data.slice(start, end).filter(c => c.id !== cryptoId.value).slice(0, 6);
+      } else {
+        // Si non trouvé, prendre les 6 premières
+        related = data.slice(0, 6);
+      }
+
+      relatedCryptos.value = related;
+
+      nextTick(() => {
+        renderMiniSparklines();
+      });
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des cryptos similaires:', error);
+  }
+}
+
+// Render les mini sparklines
+function renderMiniSparklines() {
+  relatedCryptos.value.forEach((coin) => {
+    const containerId = 'mini-spark-' + coin.id;
+    const el = document.getElementById(containerId);
+    if (!el || !coin.sparkline_in_7d || !coin.sparkline_in_7d.price || coin.sparkline_in_7d.price.length === 0) return;
+
+    const data = coin.sparkline_in_7d.price;
+    const isUp = data[data.length - 1] > data[0];
+
+    Highcharts.chart(containerId, {
+      chart: {
+        type: "line",
+        backgroundColor: "transparent",
+        height: 55,
+        margin: [2, 0, 2, 0],
+      },
+      title: { text: null },
+      credits: { enabled: false },
+      legend: { enabled: false },
+      xAxis: { visible: false },
+      yAxis: { visible: false },
+      tooltip: {
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        borderRadius: 8,
+        borderWidth: 0,
+        style: {
+          color: '#fff',
+          fontSize: '12px'
+        },
+        formatter: function() {
+          const symbol = currency.value === 'usd' ? '$' : '€';
+          return `<b>${coin.name}</b><br/>${symbol}${this.y.toFixed(2)}`;
+        }
+      },
+      plotOptions: {
+        series: {
+          lineWidth: 2,
+          marker: { enabled: false },
+          color: isUp ? "#16a34a" : "#dc2626",
+          states: {
+            hover: {
+              lineWidth: 2
+            }
+          }
+        },
+      },
+      series: [{
+        data: data,
+      }],
+    });
+  });
+}
+
+// Render le graphique principal
+function renderChart() {
+  const el = document.getElementById('crypto-detail-chart');
+  if (!el || chartData.value.length === 0) return;
+
+  if (activeTab.value === 'cours') {
+    renderCoursChart();
+  } else if (activeTab.value === 'trading') {
+    renderTradingChart();
+  } else if (activeTab.value === 'volume') {
+    renderVolumeChart();
+  } else if (activeTab.value === 'capitalisation') {
+    renderCapitalizationChart();
+  } else if (activeTab.value === 'prediction') {
+    renderPredictionChart();
+  }
+}
+
+// Graphique Cours (area)
+function renderCoursChart() {
+  const isUp = chartData.value[chartData.value.length - 1][1] > chartData.value[0][1];
+
+  const series = [{
+    name: cryptoData.value.name,
+    data: chartData.value,
+    color: isUp ? '#16a34a' : '#dc2626',
+    fillColor: {
+      linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+      stops: [
+        [0, isUp ? 'rgba(22, 163, 74, 0.4)' : 'rgba(220, 38, 38, 0.4)'],
+        [1, 'rgba(0, 0, 0, 0)']
+      ]
+    },
+  }];
+
+  // Ajouter la série de comparaison si activée
+  if (comparison.value && comparisonChartData.value.length > 0) {
+    const compIsUp = comparisonChartData.value[comparisonChartData.value.length - 1][1] > comparisonChartData.value[0][1];
+    series.push({
+      name: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1),
+      data: comparisonChartData.value,
+      color: compIsUp ? '#3b82f6' : '#f59e0b',
+      fillColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0, compIsUp ? 'rgba(59, 130, 246, 0.3)' : 'rgba(245, 158, 11, 0.3)'],
+          [1, 'rgba(0, 0, 0, 0)']
+        ]
+      },
+    });
+  }
+
+  Highcharts.chart('crypto-detail-chart', {
+    chart: {
+      type: 'area',
+      backgroundColor: 'transparent',
+      height: 300,
+    },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: {
+      enabled: comparison.value !== '',
+      itemStyle: { color: '#94a3b8' }
+    },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { color: '#94a3b8' } },
+      gridLineColor: '#1e293b',
+      lineColor: '#334155'
+    },
+    yAxis: {
+      title: { text: null },
+      labels: {
+        style: { color: '#94a3b8' },
+        formatter: function() {
+          return this.value.toLocaleString('fr-FR') + (currency.value === 'usd' ? ' $' : ' €');
+        }
+      },
+      gridLineColor: '#1e293b'
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      style: { color: '#ffffff' },
+      shared: true,
+      formatter: function() {
+        let tooltip = '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>';
+        this.points.forEach(point => {
+          tooltip += '<span style="color:' + point.color + '">\u25CF</span> ' +
+                     point.series.name + ': <b>' +
+                     point.y.toLocaleString('fr-FR', {
+                       minimumFractionDigits: 2,
+                       maximumFractionDigits: 2,
+                     }) + (currency.value === 'usd' ? ' $' : ' €') + '</b><br/>';
+        });
+        return tooltip;
+      }
+    },
+    plotOptions: {
+      area: {
+        lineWidth: 2,
+        marker: { enabled: false },
+        states: { hover: { lineWidth: 2 } }
+      }
+    },
+    series: series,
+  });
+}
+
+// Graphique Trading View (candlestick)
+function renderTradingChart() {
+  // Transformer les données en format OHLC (Open, High, Low, Close)
+  const ohlcData = [];
+  const chunkSize = Math.max(1, Math.floor(chartData.value.length / 50));
+
+  for (let i = 0; i < chartData.value.length; i += chunkSize) {
+    const chunk = chartData.value.slice(i, i + chunkSize);
+    if (chunk.length > 0) {
+      const timestamp = chunk[0][0];
+      const prices = chunk.map(d => d[1]);
+      const open = prices[0];
+      const close = prices[prices.length - 1];
+      const high = Math.max(...prices);
+      const low = Math.min(...prices);
+      ohlcData.push({
+        x: timestamp,
+        open: open,
+        high: high,
+        low: low,
+        close: close,
+        color: close >= open ? '#16a34a' : '#dc2626'
+      });
+    }
+  }
+
+  Highcharts.chart('crypto-detail-chart', {
+    chart: {
+      backgroundColor: 'transparent',
+      height: 300,
+    },
+    title: { text: null },
+    credits: { enabled: false },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { color: '#94a3b8' } },
+      gridLineColor: '#1e293b',
+      lineColor: '#334155'
+    },
+    yAxis: {
+      title: { text: null },
+      labels: {
+        style: { color: '#94a3b8' },
+        formatter: function() {
+          return this.value.toLocaleString('fr-FR') + (currency.value === 'usd' ? ' $' : ' €');
+        }
+      },
+      gridLineColor: '#1e293b'
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      style: { color: '#ffffff' },
+      formatter: function() {
+        return '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>' +
+               'Ouverture: <b>' + this.point.open.toFixed(2) + (currency.value === 'usd' ? ' $' : ' €') + '</b><br/>' +
+               'Haut: <b>' + this.point.high.toFixed(2) + (currency.value === 'usd' ? ' $' : ' €') + '</b><br/>' +
+               'Bas: <b>' + this.point.low.toFixed(2) + (currency.value === 'usd' ? ' $' : ' €') + '</b><br/>' +
+               'Clôture: <b>' + this.point.close.toFixed(2) + (currency.value === 'usd' ? ' $' : ' €') + '</b>';
+      }
+    },
+    plotOptions: {
+      candlestick: {
+        color: '#dc2626',
+        upColor: '#16a34a',
+        lineColor: '#dc2626',
+        upLineColor: '#16a34a',
+      }
+    },
+    series: [{
+      type: 'candlestick',
+      name: cryptoData.value.name,
+      data: ohlcData,
+    }]
+  });
+}
+
+// Graphique Volume
+function renderVolumeChart() {
+  if (volumeData.value.length === 0) return;
+
+  Highcharts.chart('crypto-detail-chart', {
+    chart: {
+      type: 'column',
+      backgroundColor: 'transparent',
+      height: 300,
+    },
+    title: { text: null },
+    credits: { enabled: false },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { color: '#94a3b8' } },
+      gridLineColor: '#1e293b',
+      lineColor: '#334155'
+    },
+    yAxis: {
+      title: { text: null },
+      labels: {
+        style: { color: '#94a3b8' },
+        formatter: function() {
+          return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
+        }
+      },
+      gridLineColor: '#1e293b'
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      style: { color: '#ffffff' },
+      formatter: function() {
+        return '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>' +
+               'Volume: <b>' + (this.y / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€') + '</b>';
+      }
+    },
+    plotOptions: {
+      column: {
+        color: '#3b82f6',
+        borderWidth: 0,
+      }
+    },
+    series: [{
+      name: 'Volume',
+      data: volumeData.value,
+    }]
+  });
+}
+
+// Graphique Capitalisation
+function renderCapitalizationChart() {
+  if (marketCapData.value.length === 0) return;
+
+  const isUp = marketCapData.value[marketCapData.value.length - 1][1] > marketCapData.value[0][1];
+
+  Highcharts.chart('crypto-detail-chart', {
+    chart: {
+      type: 'area',
+      backgroundColor: 'transparent',
+      height: 300,
+    },
+    title: { text: null },
+    credits: { enabled: false },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { color: '#94a3b8' } },
+      gridLineColor: '#1e293b',
+      lineColor: '#334155'
+    },
+    yAxis: {
+      title: { text: null },
+      labels: {
+        style: { color: '#94a3b8' },
+        formatter: function() {
+          return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
+        }
+      },
+      gridLineColor: '#1e293b'
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      style: { color: '#ffffff' },
+      formatter: function() {
+        return '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>' +
+               'Market Cap: <b>' + (this.y / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€') + '</b>';
+      }
+    },
+    plotOptions: {
+      area: {
+        lineWidth: 2,
+        marker: { enabled: false },
+        states: { hover: { lineWidth: 2 } }
+      }
+    },
+    series: [{
+      name: 'Capitalisation',
+      data: marketCapData.value,
+      color: isUp ? '#16a34a' : '#dc2626',
+      fillColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0, isUp ? 'rgba(22, 163, 74, 0.4)' : 'rgba(220, 38, 38, 0.4)'],
+          [1, 'rgba(0, 0, 0, 0)']
+        ]
+      },
+    }]
+  });
+}
+
+// Calculer la prédiction
+function calculatePrediction() {
+  if (chartData.value.length < 10) return;
+
+  // Adapter le nombre de points historiques selon la période
+  let historyPoints = 30; // par défaut
+  let futurePoints = 15; // par défaut
+
+  if (period.value === '7') {
+    historyPoints = Math.min(20, chartData.value.length);
+    futurePoints = 7; // Prédire 7 jours
+  } else if (period.value === '30') {
+    historyPoints = Math.min(30, chartData.value.length);
+    futurePoints = 15; // Prédire 15 jours
+  } else if (period.value === '365') {
+    historyPoints = Math.min(60, chartData.value.length);
+    futurePoints = 30; // Prédire 30 jours
+  }
+
+  // Prendre les derniers points pour la prédiction
+  const recentData = chartData.value.slice(-historyPoints);
+  const lastTimestamp = recentData[recentData.length - 1][0];
+
+  // Calculer la tendance (régression linéaire simple)
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+  const n = recentData.length;
+
+  recentData.forEach((point, i) => {
+    sumX += i;
+    sumY += point[1];
+    sumXY += i * point[1];
+    sumX2 += i * i;
   });
 
-  localStorage.setItem(storageKey, JSON.stringify(comments.value));
-  newComment.value = "";
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+
+  // Générer les points de prédiction
+  const predictionPoints = [];
+  const timeInterval = recentData[1][0] - recentData[0][0];
+
+  // Ajouter les données historiques récentes
+  predictionData.value = [...recentData];
+
+  // Ajouter les prédictions futures
+  for (let i = 1; i <= futurePoints; i++) {
+    const futureTimestamp = lastTimestamp + (timeInterval * i);
+    const predictedPrice = intercept + slope * (n + i - 1);
+
+    // Ajouter une légère variation aléatoire pour rendre la prédiction plus réaliste
+    const variance = predictedPrice * 0.02; // 2% de variance
+    const adjustment = (Math.random() - 0.5) * variance;
+
+    predictionPoints.push([futureTimestamp, predictedPrice + adjustment]);
+  }
+
+  predictionData.value = [...predictionData.value, ...predictionPoints];
 }
+
+// Graphique Prédiction
+function renderPredictionChart() {
+  if (predictionData.value.length === 0) return;
+
+  // Adapter le nombre de points historiques selon la période
+  let historyPoints = 30;
+  if (period.value === '7') {
+    historyPoints = Math.min(20, chartData.value.length);
+  } else if (period.value === '30') {
+    historyPoints = 30;
+  } else if (period.value === '365') {
+    historyPoints = 60;
+  }
+
+  const recentDataLength = Math.min(historyPoints, predictionData.value.length - 1);
+  const historicalData = predictionData.value.slice(0, recentDataLength);
+  const futureData = predictionData.value.slice(recentDataLength - 1);
+
+  const isUp = futureData[futureData.length - 1][1] > historicalData[historicalData.length - 1][1];
+
+  Highcharts.chart('crypto-detail-chart', {
+    chart: {
+      type: 'line',
+      backgroundColor: 'transparent',
+      height: 300,
+    },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: {
+      enabled: true,
+      itemStyle: { color: '#94a3b8' }
+    },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { color: '#94a3b8' } },
+      gridLineColor: '#1e293b',
+      lineColor: '#334155',
+      plotLines: [{
+        color: '#fbbf24',
+        width: 2,
+        value: historicalData[historicalData.length - 1][0],
+        dashStyle: 'Dash',
+        label: {
+          text: 'Maintenant',
+          style: { color: '#fbbf24' }
+        }
+      }]
+    },
+    yAxis: {
+      title: { text: null },
+      labels: {
+        style: { color: '#94a3b8' },
+        formatter: function() {
+          return this.value.toLocaleString('fr-FR') + (currency.value === 'usd' ? ' $' : ' €');
+        }
+      },
+      gridLineColor: '#1e293b'
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      style: { color: '#ffffff' },
+      shared: true,
+      formatter: function() {
+        let tooltip = '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>';
+        this.points.forEach(point => {
+          tooltip += '<span style="color:' + point.color + '">●</span> ' +
+                     point.series.name + ': <b>' +
+                     point.y.toLocaleString('fr-FR', {
+                       minimumFractionDigits: 2,
+                       maximumFractionDigits: 2,
+                     }) + (currency.value === 'usd' ? ' $' : ' €') + '</b><br/>';
+        });
+        return tooltip;
+      }
+    },
+    plotOptions: {
+      line: {
+        lineWidth: 2,
+        marker: { enabled: false },
+        states: { hover: { lineWidth: 2 } }
+      }
+    },
+    series: [
+      {
+        name: 'Historique',
+        data: historicalData,
+        color: '#3b82f6',
+        zIndex: 2
+      },
+      {
+        name: 'Prédiction',
+        data: futureData,
+        color: isUp ? '#16a34a' : '#dc2626',
+        dashStyle: 'ShortDash',
+        zIndex: 1
+      }
+    ]
+  });
+}
+
+// Mettre à jour le graphique
+async function updateChart() {
+  await fetchCryptoData();
+  await fetchChartData();
+}
+
+function formatPercent(value) {
+  return value !== undefined && value !== null ? value.toFixed(2) + " %" : "0.00 %";
+}
+
+function formatPrice(value) {
+  return value
+    ? value.toLocaleString("fr-FR", {
+        style: "currency",
+        currency: currency.value === 'usd' ? "USD" : "EUR",
+      })
+    : "-";
+}
+
+// Initialisation
+onMounted(async () => {
+  await fetchCryptoData();
+  await fetchChartData();
+  await fetchRelatedCryptos();
+});
+
+// Watch pour changement de route
+watch(() => route.params.id, async (newId) => {
+  if (newId) {
+    await fetchCryptoData();
+    await fetchChartData();
+    await fetchRelatedCryptos();
+  }
+});
 </script>
 
 <style scoped>
@@ -350,6 +1101,40 @@ function addComment() {
 
 .chart-area {
   flex: 3;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #3a3a3a;
+  padding-bottom: 0;
+}
+
+.chart-tab {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  bottom: -2px;
+}
+
+.chart-tab:hover {
+  color: var(--primary);
+  background: rgba(251, 191, 36, 0.05);
+}
+
+.chart-tab.active {
+  color: var(--primary);
+  font-weight: 600;
+  border-bottom-color: var(--primary);
+  background: rgba(251, 191, 36, 0.08);
 }
 
 .chart-area h3 {
