@@ -144,10 +144,10 @@ onMounted(() => {
 .nav-container {
   max-width: 1300px;
   margin: auto;
-  padding: 12px 20px;
+  padding: 8px 20px;
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
 }
 
 /* ---------- LOGO ---------- */
@@ -160,11 +160,11 @@ onMounted(() => {
 }
 
 .header-logo {
-  width: 34px;
+  width: 28px;
 }
 
 .nav-logo h1 {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--primary);
 }
@@ -178,8 +178,8 @@ onMounted(() => {
   align-items: center;
   background: var(--bg-body);
   border: 2px solid transparent;
-  border-radius: 24px;
-  padding: 10px 18px;
+  border-radius: 20px;
+  padding: 6px 14px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -192,7 +192,7 @@ onMounted(() => {
 }
 
 .search-icon {
-  width: 20px;
+  width: 18px;
   color: var(--text-light);
   transition: color 0.3s ease;
 }
@@ -206,9 +206,9 @@ onMounted(() => {
   outline: none;
   background: transparent;
   color: var(--text-color);
-  margin-left: 12px;
+  margin-left: 10px;
   width: 100%;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -222,7 +222,7 @@ onMounted(() => {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
 }
 
 .nav-link {
@@ -248,7 +248,7 @@ onMounted(() => {
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-color);
 }

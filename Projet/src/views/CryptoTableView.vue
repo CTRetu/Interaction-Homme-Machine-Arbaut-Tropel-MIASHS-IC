@@ -1,6 +1,7 @@
 <template>
   <div class="crypto-container">
-    <br /> 
+    <br />
+    <br />
     <h1 class="page-title">Tableau récapitulatif des crypto-monnaies</h1>
 
     <div class="sort-container">
@@ -224,12 +225,12 @@ export default {
       } else if (this.sortOption === 'name_desc') {
         this.cryptos.sort((a, b) => b.name.localeCompare(a.name));
       }
-      
+
       // Réinitialiser à la page 1 seulement si on change le tri manuellement
       if (this.currentPage !== 1) {
         this.currentPage = 1;
       }
-      
+
       this.$nextTick(() => this.renderSparklines());
     },
   },
