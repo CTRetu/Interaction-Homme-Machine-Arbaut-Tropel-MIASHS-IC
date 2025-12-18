@@ -1,22 +1,43 @@
 <template>
   <div class="toggle">
-    <span :class="{ active: value }" @click="value = true">OUI</span>
-    <span :class="{ active: !value }" @click="value = false">NON</span>
+    <span
+      :class="{ active: modelValue }"
+      @click="set(true)"
+    >
+      OUI
+    </span>
+
+    <span
+      :class="{ active: !modelValue }"
+      @click="set(false)"
+    >
+      NON
+    </span>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return { value: false };
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true
+    }
+  },
+  methods: {
+    set(value) {
+      this.$emit("update:modelValue", value)
+      this.$emit("change", value) // pour ton @change existant
+    }
   }
-};
+}
 </script>
 
 <style scoped>
 .toggle {
   display: flex;
   gap: 6px;
+  margin-right: 50px;
 }
 
 .toggle span {

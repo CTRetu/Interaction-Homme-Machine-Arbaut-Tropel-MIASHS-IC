@@ -14,6 +14,14 @@ import SearchView from '../views/SearchView.vue'
 
 export default createRouter({
   history: createWebHistory(),
+  
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0, behavior: 'smooth' };
+    }
+  },
 
   routes: [
     { path: '/', name: 'home', component: HomeView },

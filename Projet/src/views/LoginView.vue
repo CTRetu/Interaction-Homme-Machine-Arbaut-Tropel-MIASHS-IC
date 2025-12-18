@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="register-container">
     <div class="register-card">
 
@@ -12,10 +12,8 @@
         <input type="password" v-model="password" required />
 
         <div class="keep-connected">
-          <br/>
-          <input type="checkbox" v-model="keepConnected" />
-          <span> Rester connecté</span>
-          <br/><br/>
+          <input type="checkbox" v-model="keepConnected" id="keepConnectedLogin" />
+          <label for="keepConnectedLogin">Rester connecté</label>
         </div>
 
         <button type="submit" class="btn-primary">Se connecter</button>
@@ -46,8 +44,12 @@ export default {
 
   methods: {
     handleLogin() {
+      const userStore = useUserStore();
+
+      // 1. Récupérer utilisateurs stockés
       const users = JSON.parse(localStorage.getItem("users")) || [];
 
+      // 2. Vérifier si email + mdp correspondent
       const user = users.find(
         u => u.email === this.email && u.password === this.password
       );
@@ -57,19 +59,20 @@ export default {
         return;
       }
 
-      // currentUser localStorage
+      // 3. Créer l'objet utilisateur
       const currentUser = { pseudo: user.pseudo, email: user.email };
+
+      // 4. Stocker dans localStorage pour persistance
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-      // keepConnected
+      // 5. Mettre à jour le store Pinia
+      userStore.login(currentUser);
+
+      // 6. Gestion du keepConnected
       if (this.keepConnected) localStorage.setItem("keepConnected", "true");
       else localStorage.removeItem("keepConnected");
 
-      // Pinia
-      const userStore = useUserStore();
-      userStore.login(currentUser);
-
-      // Redirection
+      // 7. Redirection
       this.$router.push({ name: "settings" });
     }
   }

@@ -2,6 +2,7 @@
   <div class="settings-container">
 
     <h1 class="page-title">Paramètres de compte</h1>
+    <br/>
 
     <!-- Message succès après inscription -->
     <p class="success-message" v-if="showSuccessMessage">
@@ -15,6 +16,8 @@
       <div v-if="!editing">
         <p><strong>Pseudo :</strong> {{ userPseudo }}</p>
         <p><strong>Email :</strong> {{ userEmail }}</p>
+
+        <br/>
 
         <button class="btn-primary" @click="editing = true">
           Modifier mes informations
@@ -40,6 +43,7 @@
         <button class="btn-primary" @click="updateAccount">
           Enregistrer les modifications
         </button>
+        <br/>
 
         <!-- Suppression compte -->
         <section class="card delete-section">
@@ -98,6 +102,7 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
       <button class="btn-reset" @click="resetDashboard">
         Réinitialiser le tableau de bord
       </button>
+      <br/>
 
       <div class="dashboard-grid">
 
@@ -118,17 +123,21 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
             @dragend="onDragEnd"
             @touchstart="onTouchStart(index)">
 
+            <button class="delete-widget" @click="removeWidget(index)">✖</button>
+
             <!-- -------- WIDGET NUMBER -------- -->
             <div v-if="allWidgets[widgetId].type === 'number'" class="widget-number">
-              <h3>{{ allWidgets[widgetId].title }}</h3>
-              <p class="widget-value">{{ allWidgets[widgetId].value }}</p>
+              <div class="widget-content">
+                <h3 class="widget-title">{{ allWidgets[widgetId].title }}</h3>
+                <p class="widget-value">{{ allWidgets[widgetId].value }}</p>
 
-              <table class="mini-table">
-                <tr v-for="row in getNumberWidgetPageRows(widgetId)" :key="row.key">
-                  <td>{{ row.label }}</td>
-                  <td class="right">{{ row.value }}</td>
-                </tr>
-              </table>
+                <table class="mini-table">
+                  <tr v-for="row in getNumberWidgetPageRows(widgetId)" :key="row.key">
+                    <td>{{ row.label }}</td>
+                    <td class="right">{{ row.value }}</td>
+                  </tr>
+                </table>
+              </div>
 
               <div class="table-pagination"
                 v-if="getNumberWidgetTotalPages(widgetId) > 1">
@@ -176,14 +185,16 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 
             <!-- -------- WIDGET TABLE -------- -->
             <div v-else-if="allWidgets[widgetId].type === 'table'" class="widget-table">
-              <h3>{{ allWidgets[widgetId].title }}</h3>
+              <div class="widget-content">
+                <h3 class="widget-title">{{ allWidgets[widgetId].title }}</h3>
 
-              <table>
-                <tr v-for="row in getTablePageRows(widgetId)" :key="row.key">
-                  <td>{{ row.label }}</td>
-                  <td class="right">{{ row.value }}</td>
-                </tr>
-              </table>
+                <table>
+                  <tr v-for="row in getTablePageRows(widgetId)" :key="row.key">
+                    <td>{{ row.label }}</td>
+                    <td class="right">{{ row.value }}</td>
+                  </tr>
+                </table>
+              </div>
 
               <div class="table-pagination"
                    v-if="getTotalTablePages(widgetId) > 1">
@@ -236,58 +247,69 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
       <p class="hint">Les notifications se font uniquement par email.</p>
 
       <table class="notif-table">
+        <tbody>
+          <!-- Gestion globale -->
+          <tr>
+          <td class="notif-category-title notif-text">Gestion de toutes les notifications</td>
+          <td>
+            <div class="toggle-cell">
+              <div class="notif-group-selector-inline">
+                <button
+                  :class="{ active: notificationGroupPortfolio === 'all' }"
+                  @click="setPortfolioGroup('all')"
+                >Toutes</button>
 
-        <!-- Ligne header avec titre + boutons -->
-        <tr class="notif-header-row">
-          <td colspan="2" class="notif-header-with-buttons">
+                <button
+                  :class="{ active: notificationGroupPortfolio === 'none' }"
+                  @click="setPortfolioGroup('none')"
+                >Aucune</button>
 
-            <span class="notif-category-title-inline">Variation du portefeuille</span>
-
-            <div class="notif-group-selector-inline">
-              <button
-                :class="{ active: notificationGroupPortfolio === 'all' }"
-                @click="setPortfolioGroup('all')"
-              >Toutes</button>
-
-              <button
-                :class="{ active: notificationGroupPortfolio === 'none' }"
-                @click="setPortfolioGroup('none')"
-              >Aucune</button>
-
-              <button
-                :class="{ active: notificationGroupPortfolio === 'custom' }"
-                @click="setPortfolioGroup('custom')"
-              >Personnalisé</button>
+                <button
+                  :class="{ active: notificationGroupPortfolio === 'custom' }"
+                  disabled
+                >Personnalisé</button>
+              </div>
             </div>
-
           </td>
         </tr>
 
-        <!-- Rows -->
+        <!-- Variation portefeuille -->
         <tr>
-          <td>Gains</td>
+          <td colspan="2" class="notif-category-title notif-text">Variation du portefeuille</td>
+        </tr>
+
+        <tr>
+          <td class="notif-text">Gains</td>
           <td class="toggle-cell">
             <ToggleSwitch v-model="notificationsPortfolio.gains" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td>Pertes</td>
+          <td class="notif-text">Pertes</td>
           <td class="toggle-cell">
             <ToggleSwitch v-model="notificationsPortfolio.pertes" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
+        <!-- Communauté -->
         <tr>
-          <td>Toutes variations</td>
+          <td colspan="2" class="notif-category-title notif-text">Communauté</td>
+        </tr>
+
+        <tr>
+          <td class="notif-text">Recommandations d’articles</td>
           <td class="toggle-cell">
             <ToggleSwitch v-model="notificationsPortfolio.toutes" @change="updatePortfolioGroup" />
+            <ToggleSwitch v-model="notificationsPortfolio.recommandations_articles" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
-        <!-- ==== Communauté ==== -->
         <tr>
-          <td colspan="2" class="notif-category-title">Communauté</td>
+          <td class="notif-text">Commentaires sous vos articles</td>
+          <td class="toggle-cell">
+            <ToggleSwitch v-model="notificationsPortfolio.commentaires" @change="updatePortfolioGroup" />
+          </td>
         </tr>
 
         <tr>
@@ -320,14 +342,44 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
         <tr>
           <td>Recommandations du jour</td>
           <td class="toggle-cell"><ToggleSwitch /></td>
+          <td class="notif-text">Réponses à vos commentaires</td>
+          <td class="toggle-cell">
+            <ToggleSwitch v-model="notificationsPortfolio.reponses" @change="updatePortfolioGroup" />
+          </td>
         </tr>
 
-      </table>
+        <tr>
+          <td class="notif-text">Demandes de suivi</td>
+          <td class="toggle-cell">
+            <ToggleSwitch v-model="notificationsPortfolio.demandes_suivi" @change="updatePortfolioGroup" />
+          </td>
+        </tr>
 
+        <tr>
+          <td class="notif-text">Activités des personnes suivies</td>
+          <td class="toggle-cell">
+            <ToggleSwitch v-model="notificationsPortfolio.activites_suivies" @change="updatePortfolioGroup" />
+          </td>
+        </tr>
+
+        <!-- Reco crypto -->
+        <tr>
+          <td colspan="2" class="notif-category-title notif-text">Recommandations crypto</td>
+        </tr>
+
+        <tr>
+          <td class="notif-text">Recommandations du jour</td>
+          <td class="toggle-cell">
+            <ToggleSwitch v-model="notificationsPortfolio.recommandations_crypto" @change="updatePortfolioGroup" />
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </section>
 
-
-    <button class="btn-save">Enregistrer les modifications</button>
+    <button class="btn-save" @click="$router.push('/')">
+      Enregistrer les modifications
+    </button>
 
   </div>
 </template>
@@ -335,10 +387,16 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
 <script>
 import ToggleSwitch from "@/components/ToggleSwitch.vue";
 import Highcharts from "highcharts";
+import { useUserStore } from '@/stores/userStore';
 
 export default {
   name: "SettingsView",
   components: { ToggleSwitch },
+
+  setup() {
+    const userStore = useUserStore();
+    return { userStore };
+  },
 
   data() {
     return {
@@ -363,15 +421,16 @@ export default {
 
       // Cryptos possédées (données fictives)
       ownedCryptos: [
-        { symbol: "BTC", name: "Bitcoin", value: 1250, change24h: 53 },
-        { symbol: "ETH", name: "Ethereum", value: 820, change24h: 21 },
-        { symbol: "SOL", name: "Solana", value: 560, change24h: -12 },
-        { symbol: "BNB", name: "BNB", value: 320, change24h: 6 },
-        { symbol: "ADA", name: "Cardano", value: 160, change24h: -3 },
-        { symbol: "XRP", name: "XRP", value: 110, change24h: 1 },
-        { symbol: "AVAX", name: "Avalanche", value: 350, change24h: 14 },
-        { symbol: "DOT", name: "Polkadot", value: 190, change24h: 4 },
-        { symbol: "MATIC", name: "Polygon", value: 140, change24h: -2 }
+        // Valeurs fictives revues pour un total proche de 1 000 $US
+        { symbol: "BTC", name: "Bitcoin", value: 400, change24h: 53 },
+        { symbol: "ETH", name: "Ethereum", value: 250, change24h: 21 },
+        { symbol: "SOL", name: "Solana", value: 150, change24h: -12 },
+        { symbol: "BNB", name: "BNB", value: 80, change24h: 6 },
+        { symbol: "ADA", name: "Cardano", value: 60, change24h: -3 },
+        { symbol: "XRP", name: "XRP", value: 40, change24h: 1 },
+        { symbol: "AVAX", name: "Avalanche", value: 20, change24h: 14 },
+        { symbol: "DOT", name: "Polkadot", value: 30, change24h: 4 },
+        { symbol: "MATIC", name: "Polygon", value: 20, change24h: -2 }
       ],
 
       // Widgets configurables
@@ -386,7 +445,7 @@ export default {
         gainTotal: {
           type: "number",
           title: "Gains / Pertes totales",
-          value: "+ 3 240 $US",
+          value: "+ 120 $US",
           detailType: "value",
           pageSize: 3
         },
@@ -409,12 +468,12 @@ export default {
           type: "table",
           title: "Détails investissements",
           source: "ownedCryptos",
-          pageSize: 4
+          pageSize: 3
         },
         investTotal: {
           type: "number",
           title: "Total investi",
-          value: "2 800 $US",
+          value: "1 000 $US",
           detailType: "value",
           pageSize: 3
         },
@@ -422,7 +481,7 @@ export default {
           type: "table",
           title: "Recommandations Crypto",
           source: "static",
-          pageSize: 3,
+          pageSize: 2,
           rows: [
             { key: "avax", label: "Avalanche (AVAX)", value: "Tendance : HAUSSE" },
             { key: "link", label: "Chainlink (LINK)", value: "Tendance : FORTE HAUSSE" },
@@ -505,12 +564,20 @@ export default {
       draggingIndex: null,
       hoverIndex: null,
 
-      // Notifications variation portefeuille
-      notificationGroupPortfolio: "none",
+      // Notifications
+      notificationGroupPortfolio: "all",
+
       notificationsPortfolio: {
-        gains: false,
-        pertes: false,
-        toutes: false
+        gains: true,
+        pertes: true,
+
+        recommandations_articles: true,
+        commentaires: true,
+        reponses: true,
+        demandes_suivi: true,
+        activites_suivies: true,
+
+        recommandations_crypto: true
       }
     };
   },
@@ -529,10 +596,9 @@ export default {
       this.userEmail = current.email;
     }
 
-    // Charger un dashboard sauvegardé s'il existe
-    const savedDash = JSON.parse(localStorage.getItem("dashboard"));
-    if (savedDash && Array.isArray(savedDash) && savedDash.length > 0) {
-      this.dashboard = savedDash;
+    // Charger le dashboard depuis le store Pinia
+    if (this.userStore.dashboardConfig && this.userStore.dashboardConfig.length > 0) {
+      this.dashboard = [...this.userStore.dashboardConfig];
     }
 
     // Générer des données fictives pour les graphiques
@@ -548,6 +614,9 @@ export default {
     // Rendu initial des graphiques
     this.renderAllCharts();
 
+    // Écouter les changements de thème
+    window.addEventListener('themeChange', this.renderAllCharts);
+
     // Initialiser les pages pour les widgets "number"
     this.dashboard.forEach(w => {
       const widget = this.allWidgets[w];
@@ -557,6 +626,10 @@ export default {
         }
       }
     });
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('themeChange', this.renderAllCharts);
   },
 
   computed: {
@@ -738,7 +811,8 @@ export default {
 
     /* ---------- Gestion dashboard ---------- */
     saveDashboard() {
-      localStorage.setItem("dashboard", JSON.stringify(this.dashboard));
+      // Sauvegarder dans le store Pinia (qui synchronise avec localStorage)
+      this.userStore.updateDashboardConfig(this.dashboard);
     },
 
     openAddMenu(index) {
@@ -814,6 +888,9 @@ export default {
       const el = document.getElementById(containerId);
       if (!el) return;
 
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#f0f0f0' : '#333';
+
       const widget = this.allWidgets[widgetId];
       const symbol = this.selectedCryptoByWidget[widgetId];
       const data = this.chartData[symbol][widget.detailType];
@@ -842,16 +919,20 @@ export default {
 
         xAxis: {
           categories,
-          title: { text: "Temps" }
+          title: { text: "Temps", style: { color: textColor } },
+          labels: { style: { color: textColor } }
         },
 
         yAxis: {
-          title: { text: "$US" }
+          title: { text: "$US", style: { color: textColor } },
+          labels: { style: { color: textColor } }
         },
 
         tooltip: {
           valueDecimals: 2,
-          valueSuffix: " $US"
+          valueSuffix: " $US",
+          backgroundColor: isDark ? '#333' : '#fff',
+          style: { color: textColor }
         },
 
         series: [
@@ -970,38 +1051,35 @@ export default {
       return Math.max(1, Math.ceil(rows.length / pageSize));
     },
 
-    /* ---------- Notifications variation portefeuille ---------- */
-    updatePortfolioGroup() {
-      const { gains, pertes, toutes } = this.notificationsPortfolio;
-
-      if (gains && pertes && toutes) {
-        this.notificationGroupPortfolio = "all";
-      } else if (!gains && !pertes && !toutes) {
-        this.notificationGroupPortfolio = "none";
-      } else {
-        this.notificationGroupPortfolio = "custom";
-      }
+    removeWidget(index) {
+      this.dashboard.splice(index, 1);
+      this.saveDashboard();
+      this.renderAllCharts();
     },
 
+    /* ---------- Notifications variation portefeuille ---------- */
     setPortfolioGroup(mode) {
-      this.notificationGroupPortfolio = mode;
+      this.notificationGroupPortfolio = mode
+      const value = mode === "all"
 
-      if (mode === "all") {
-        this.notificationsPortfolio = {
-          gains: true,
-          pertes: true,
-          toutes: true
-        };
-      } else if (mode === "none") {
-        this.notificationsPortfolio = {
-          gains: false,
-          pertes: false,
-          toutes: false
-        };
-      } else if (mode === "custom") {
-        // On ne touche pas aux valeurs : l'utilisateur gère à la main
+      Object.keys(this.notificationsPortfolio).forEach(key => {
+        this.notificationsPortfolio[key] = value
+      })
+    },
+
+    updatePortfolioGroup() {
+      const values = Object.values(this.notificationsPortfolio)
+
+      if (values.every(v => v === true)) {
+        this.notificationGroupPortfolio = "all"
+      } else if (values.every(v => v === false)) {
+        this.notificationGroupPortfolio = "none"
+      } else {
+        this.notificationGroupPortfolio = "custom"
       }
     }
+
+
   }
 };
 </script>
@@ -1428,4 +1506,3 @@ input {
 }
 
 </style>
-

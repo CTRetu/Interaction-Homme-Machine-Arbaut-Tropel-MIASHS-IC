@@ -551,22 +551,52 @@ form input[type="password"] {
   padding: 10px;
   margin-top: 5px;
   border-radius: 8px;
-  border: 1px solid var(--border-color);  /* ⚡ thème */
-  background: var(--bg-secondary);        /* ⚡ thème */
-  color: var(--text-color);               /* ⚡ thème */
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary); 
+  color: var(--text-color); 
 }
 
 form input::placeholder {
-  color: var(--text-light);               /* ⚡ thème */
+  color: var(--text-light); 
 }
 
+.keep-connected {
+  display: inline-flex;        /* shrink to content width */
+  align-items: center;
+  gap: 0;
+  margin: 10px 0;
+  margin-left: auto;           /* push the group to the right */
+}
+
+.keep-connected input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* prevent children from stretching and causing big gaps */
+.keep-connected input[type="checkbox"],
+.keep-connected label {
+  flex: 0 0 auto;
+}
+
+.keep-connected label {
+  margin-top: 0; /* override global form label margin */
+  margin-left: 2px; /* tiny space between box and text */
+  display: inline-flex;
+  align-items: center; /* ensure perfect vertical alignment with checkbox */
+  line-height: 1;      /* avoid extra vertical offset */
+}
+
+.keep-connected label,
 .keep-connected span {
-  color: var(--text-color);               /* ⚡ thème */
+  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
 }
 
 .btn-primary {
   width: 100%;
-  background: var(--primary);             /* ⚡ thème */
+  background: var(--primary);
   color: white;
   padding: 12px;
   font-size: 16px;
@@ -593,3 +623,866 @@ html.dark .small-login-btn {
 html.dark .small-login-btn:hover {
   background: #ffffff35;
 }
+
+.btn-reset {
+  min-width: 260px;
+  padding: 12px 20px;
+}
+
+.notif-group-selector-inline {
+  display: flex;
+  gap: 6px;
+  margin-right: 50px;
+}
+
+.settings-container {
+  width: 90%;
+  max-width: 950px;
+  margin: auto;
+  padding: 30px 0;
+  color: #3b3b3b;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.page-title {
+  font-size: 28px;
+  color: #d18c00;
+}
+
+.success-message {
+  color: #2ecc71;
+  margin-bottom: 20px;
+}
+
+/* -------- CARDS -------- */
+.card {
+  background: #fff8e6;
+  border: 1px solid #dcb676;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.card h2 {
+  color: #d18c00;
+  margin-bottom: 12px;
+}
+
+/* -------- BUTTONS -------- */
+.btn-primary,
+.btn-delete,
+.btn-cancel,
+.btn-reset,
+.btn-save {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  display: block;
+  width: 90%;
+  max-width: 300px;
+  margin: 12px auto 0 auto;
+}
+
+.btn-primary {
+  background: #e0a74f;
+}
+.btn-primary:hover {
+  background: #cf8e2f;
+}
+
+.btn-reset {
+  background: #c94f4f;
+  max-width: 220px;
+}
+.btn-reset:hover {
+  background: #a73f3f;
+}
+
+.btn-delete {
+  background: #ff6b6b;
+}
+.btn-delete:hover {
+  background: #e04848;
+}
+
+.btn-cancel {
+  background: #b6b6b6;
+}
+.btn-cancel:hover {
+  background: #8f8f8f;
+}
+
+.btn-save {
+  background: #d18c00;
+  max-width: 350px;
+}
+.btn-save:hover {
+  background: #b67500;
+}
+
+/* -------- INPUTS -------- */
+input {
+  width: 60%;
+  padding: 10px;
+  border: 1px solid #cdaa6f;
+  border-radius: 6px;
+  margin: 6px 0 12px;
+}
+
+/* -------- PORTFOLIOS -------- */
+.wallet-list {
+  margin-top: 10px;
+}
+
+.wallet-item {
+  background: #ffe9c4;
+  border: 1px solid #d4b07a;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.wallet-delete {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+
+.wallet-delete:hover {
+  background: #d9534f;
+}
+
+.wallet-success {
+  color: #2ecc71;
+  margin-top: 5px;
+}
+
+/* -------- INFO ICONS -------- */
+.info-icon,
+.info-icon-dashboard {
+  font-size: 18px;
+  margin-left: 6px;
+  cursor: help;
+  color: #d18c00;
+}
+
+/* -------- DASHBOARD HEADER -------- */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+}
+
+.dashboard-settings-link {
+  color: white;
+  font-size: 14px;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--primary);
+  transition: background 0.3s;
+}
+
+.dashboard-settings-link:hover {
+  background: var(--primary-hover);
+}
+
+/* -------- DASHBOARD GRID -------- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.dashboard-slot {
+  height: 300px;
+  position: relative;
+}
+
+.dashboard-slot.drag-hover {
+  background: #fff3d270;
+  border: 2px dashed #d18c00;
+  border-radius: 14px;
+}
+
+.dash-item {
+  background: #ffe9c4;
+  border: 2px solid #d4b07a;
+  border-radius: 14px;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: grab;
+  position: relative;
+}
+
+.dash-item:active {
+  cursor: grabbing;
+}
+
+.delete-widget {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #555;
+  cursor: pointer;
+}
+
+.delete-widget:hover {
+  color: #000;
+}
+
+.widget-content {
+  flex: 1;
+  overflow: hidden; /* Prevent overflow */
+  height: 100%;
+}
+
+.table-pagination {
+  position: absolute;
+  bottom: 10px;
+  left: 16px;
+  right: 16px;
+  margin: 0;
+}
+
+.dash-add {
+  background: #fff3d2;
+  border: 2px dashed #cfa45a;
+  border-radius: 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #8a6d3b;
+}
+.dash-add:hover {
+  background: #ffeec0;
+}
+
+/* Dark mode for dashboard */
+html.dark .dash-item {
+  background: #3a3a3a;
+  border-color: #555;
+}
+
+html.dark .dash-add {
+  background: #2a2a2a;
+  border-color: #555;
+  color: #ccc;
+}
+
+html.dark .dash-add:hover {
+  background: #333;
+}
+
+html.dark .delete-widget {
+  color: #ccc;
+}
+
+html.dark .delete-widget:hover {
+  color: #fff;
+}
+
+/* Dark mode for settings page */
+html.dark .card {
+  background: #2a2a2a;
+  border-color: #555;
+}
+
+html.dark .card h2 {
+  color: #f2b45b;
+}
+
+html.dark .btn-primary {
+  background: #f2b45b;
+  color: #1b1b1b;
+}
+
+html.dark .btn-primary:hover {
+  background: #d99c47;
+}
+
+html.dark .btn-delete {
+  background: #d9534f;
+  color: white;
+}
+
+html.dark .btn-delete:hover {
+  background: #c9302c;
+}
+
+html.dark .btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+html.dark .btn-cancel:hover {
+  background: #5a6268;
+}
+
+html.dark .btn-reset {
+  background: #f0ad4e;
+  color: #1b1b1b;
+}
+
+html.dark .btn-reset:hover {
+  background: #ec971f;
+}
+
+html.dark .btn-save {
+  background: #5cb85c;
+  color: white;
+}
+
+html.dark .btn-save:hover {
+  background: #4cae4c;
+}
+
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"] {
+  background: #333;
+  border-color: #555;
+  color: #f0f0f0;
+}
+
+html.dark input::placeholder {
+  color: #bbb;
+}
+
+html.dark .success-message {
+  color: #5cb85c;
+}
+
+html.dark .delete-warning {
+  color: #d9534f;
+}
+
+html.dark .wallet-list .wallet-item {
+  background: #333;
+  border-color: #555;
+}
+
+html.dark .wallet-delete {
+  color: #d9534f;
+}
+
+html.dark .wallet-delete:hover {
+  color: #c9302c;
+}
+
+html.dark .hint {
+  color: #bbb;
+}
+
+html.dark .page-title {
+  color: #f2b45b;
+}
+
+html.dark .info-icon::after {
+  color: #f2b45b;
+}
+
+html.dark .table-pagination button {
+  background: #444;
+  color: #f0f0f0;
+  border-color: #666;
+}
+
+html.dark .table-pagination button:hover {
+  background: #555;
+}
+
+html.dark .notif-table td {
+  color: #f0f0f0;
+}
+
+html.dark .notif-table tr {
+  background-color: #333;
+  border-bottom-color: #444;
+}
+
+html.dark .notif-category-title {
+  color: #f2b45b;
+}
+
+html.dark .notif-group-selector-inline button {
+  background: #444;
+  border-color: #666;
+  color: #f0f0f0;
+}
+
+html.dark .notif-group-selector-inline button.active {
+  background: #f2b45b;
+  color: #1b1b1b;
+}
+
+/* Additional text colors for dark mode */
+html.dark .widget-title {
+  color: #f0f0f0;
+}
+
+html.dark .widget-value {
+  color: #f0f0f0;
+}
+
+html.dark .mini-table td {
+  color: #f0f0f0;
+}
+
+html.dark .mini-table th {
+  color: #f0f0f0;
+}
+
+html.dark table td {
+  color: #f0f0f0;
+}
+
+html.dark table th {
+  color: #f0f0f0;
+}
+
+html.dark .crypto-select {
+  background: #333;
+  color: #f0f0f0;
+  border-color: #555;
+}
+
+html.dark .crypto-select option {
+  background: #333;
+  color: #f0f0f0;
+}
+
+html.dark label {
+  color: #f0f0f0;
+}
+
+html.dark .info-icon {
+  color: #f2b45b;
+}
+
+html.dark .info-icon::after {
+  color: #f2b45b;
+}
+
+html.dark strong {
+  color: #f0f0f0;
+}
+
+html.dark .wallet-success {
+  color: #f0f0f0;
+}
+
+html.dark .btn-reset {
+  background: #d9534f;
+  color: white;
+}
+
+html.dark .btn-reset:hover {
+  background: #c9302c;
+}
+
+html.dark .btn-save {
+  background: #f0ad4e;
+  color: #1b1b1b;
+}
+
+html.dark .btn-save:hover {
+  background: #ec971f;
+}
+
+html.dark .card p {
+  color: #f0f0f0;
+}
+
+/* -------- CRYPTO TABLE VIEW -------- */
+.page-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.crypto-container {
+  overflow-x: auto;
+}
+
+.sort-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sort-container label {
+  font-weight: bold;
+}
+
+.sort-container select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+td:nth-child(2) {
+  max-width: 150px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: left;
+}
+
+.positive {
+  color: #16a34a;
+}
+
+.negative {
+  color: #dc2626;
+}
+
+.sparkline {
+  width: 120px;
+  height: 40px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-weight: bold;
+}
+
+/* Dark mode for crypto table */
+html.dark table {
+  color: #f0f0f0;
+}
+
+html.dark th,
+html.dark td {
+  border-bottom-color: #555;
+}
+
+html.dark .pagination button {
+  background: #f2b45b;
+  color: #1b1b1b;
+}
+
+html.dark .pagination button:disabled {
+  background: #555;
+  color: #ccc;
+}
+
+html.dark .sort-container select {
+  background: #333;
+  color: #f0f0f0;
+  border-color: #555;
+}
+
+/* Add menu */
+.add-menu {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  background: #fff8e6;
+  border: 1px solid #dcb676;
+  border-radius: 12px;
+  padding: 12px;
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.add-menu-item {
+  background: #e0a74f;
+  color: white;
+  padding: 6px 10px;
+  margin: 5px 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.add-menu-item:hover {
+  background: #cf8e2f;
+}
+
+/* -------- WIDGETS : TITRES -------- */
+.widget-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #7a5600;
+  margin-bottom: 10px;
+}
+
+/* -------- WIDGET NUMBER -------- */
+.widget-number {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* center vertically within content area */
+  height: 100%;            /* fill available height to allow vertical centering */
+  position: relative;      /* enable absolute centering of value */
+}
+
+.widget-value {
+  font-size: 42px;
+  font-weight: bold;
+  margin: 0; /* avoid shifting when absolutely centered */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mini-table {
+  width: 100%;
+  font-size: 16px;
+}
+
+.mini-table td {
+  padding: 3px 5px;
+}
+
+.mini-table .right {
+  text-align: right;
+}
+
+/* -------- WIDGET TABLE -------- */
+.widget-table table {
+  width: 100%;
+  font-size: 16px;
+}
+.widget-table td {
+  border-bottom: 1px solid #e4cfa6;
+  padding: 5px 8px;
+}
+
+.widget-table .right {
+  text-align: right;
+}
+
+/* Pagination */
+.table-pagination {
+  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.table-pagination button {
+  background: #e0a74f;
+  color: white;
+  border-radius: 6px;
+  border: none;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+.table-pagination button:hover {
+  background: #cf8e2f;
+}
+
+/* -------- WIDGET CHART -------- */
+.chart-controls {
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.crypto-select {
+  background: transparent;
+  border: 1px solid #cfa45a;
+  border-radius: 6px;
+  padding: 4px 6px;
+  color: #7a5600;
+  font-weight: bold;
+}
+
+.chart-container {
+  height: 150px;
+}
+
+/* -------- NOTIFICATIONS -------- */
+
+/* Header group (Toutes / Aucune / Personnalisé) */
+.notif-group-selector {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.notif-group-selector button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #cfa45a;
+  background: #ecd8a5;
+  color: #7a5600;
+  cursor: pointer;
+}
+
+.notif-group-selector button.active {
+  background: #d18c00;
+  color: white;
+  font-weight: bold;
+}
+
+.notif-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.notif-table tr {
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f5e8;
+}
+
+.notif-table td {
+  padding: 10px 6px;
+  font-size: 16px;
+  color: #6a4d1c;
+}
+
+.notif-table td:last-child {
+  text-align: right;
+  min-width: 200px;
+}
+
+.notif-category-title {
+  padding-top: 15px;
+  padding-bottom: 4px;
+  font-weight: bold;
+  color: #d18c00;
+  text-align: left;
+}
+
+.notif-text {
+  text-align: left !important;
+}
+
+.toggle-cell {
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-slot {
+    height: auto;
+    min-height: 220px;
+  }
+  .dash-item {
+    height: auto;
+  }
+  .chart-container {
+    height: 190px !important;
+  }
+}
+
+
+/* Ligne d’en-tête avec boutons intégrés */
+.notif-header-row td {
+  background: var(--notif-bg);
+  padding: 12px 8px;
+}
+
+.notif-header-with-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notif-category-title-inline {
+  font-weight: bold;
+  color: var(--text-title);
+  font-size: 18px;
+}
+
+/* Boutons inline */
+.notif-group-selector-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.notif-group-selector-inline button {
+  padding: 4px 8px;
+  border-radius: 20px;
+  background: #ecd8a5;
+  border: 1px solid #cfa45a;
+  color: #7a5600;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 12px;
+}
+
+.notif-group-selector-inline button.active {
+  background: #d18c00;
+  color: white;
+}
+

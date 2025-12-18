@@ -116,8 +116,8 @@ function handleLogout() {
 
 /* THEME */
 function toggleTheme() {
-  isDark.value = !isDark.value;
-  document.documentElement.className = isDark.value ? "dark" : "light";
+  isDark.value = !isDark.value
+  document.documentElement.className = isDark.value ? "dark" : "light"
 }
 
 /* INIT */
