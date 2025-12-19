@@ -1,5 +1,5 @@
 <template>
-  <div class="settings-container">
+  <div class="settings-container" style="max-width:1100px; width:100%">
 
     <h1 class="page-title">Paramètres de compte</h1>
     <br/>
@@ -1168,8 +1168,8 @@ export default {
 <style scoped>
 /* -------- GLOBAL -------- */
 .settings-container {
-  width: 90%;
-  max-width: 950px;
+  width: 100%;
+  max-width: 1100px;
   margin: auto;
   padding: 30px 0;
   color: #3b3b3b;
