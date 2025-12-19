@@ -185,21 +185,21 @@
         <h3>Paramètres</h3>
 
         <label>Période :</label>
-        <select v-model="period" @change="updateChart">
+        <select v-model="period">
           <option value="7">1 semaine</option>
           <option value="30">1 mois</option>
           <option value="365">1 an</option>
         </select>
 
         <label>Comparaison :</label>
-        <select v-model="comparison" @change="updateChart">
+        <select v-model="comparison">
           <option value="">Aucune</option>
           <option value="ethereum">Ethereum</option>
           <option value="binancecoin">BNB</option>
         </select>
 
         <label>Devise :</label>
-        <select v-model="currency" @change="updateChart">
+        <select v-model="currency">
           <option value="usd">$US</option>
           <option value="eur">€ EUR</option>
         </select>
@@ -305,8 +305,11 @@ const cryptoData = ref({
 const chartData = ref([]);
 const comparisonChartData = ref([]);
 const volumeData = ref([]);
+const comparisonVolumeData = ref([]);
 const marketCapData = ref([]);
+const comparisonMarketCapData = ref([]);
 const predictionData = ref([]);
+const comparisonPredictionData = ref([]);
 const relatedCryptos = ref([]);
 
 /* BUY LINKS (CLIQUABLES) */
@@ -358,6 +361,12 @@ async function fetchChartData() {
     const url = `https://api.coingecko.com/api/v3/coins/${cryptoId.value}/market_chart?vs_currency=${currency.value}&days=${period.value}`;
 
     const res = await fetch(url);
+
+    if (res.status === 429) {
+      alert('Trop de requêtes à l\'API. Veuillez patienter quelques secondes.');
+      return;
+    }
+
     const data = await res.json();
 
     if (data && data.prices) {
@@ -381,13 +390,34 @@ async function fetchChartData() {
     if (comparison.value) {
       const compUrl = `https://api.coingecko.com/api/v3/coins/${comparison.value}/market_chart?vs_currency=${currency.value}&days=${period.value}`;
       const compRes = await fetch(compUrl);
+
+      if (compRes.status === 429) {
+        return;
+      }
+
       const compData = await compRes.json();
 
       if (compData && compData.prices) {
         comparisonChartData.value = compData.prices.map(([timestamp, price]) => [timestamp, price]);
       }
+
+      if (compData && compData.total_volumes) {
+        comparisonVolumeData.value = compData.total_volumes.map(([timestamp, volume]) => [timestamp, volume]);
+      }
+
+      if (compData && compData.market_caps) {
+        comparisonMarketCapData.value = compData.market_caps.map(([timestamp, cap]) => [timestamp, cap]);
+      }
+
+      // Calculer la prédiction pour la comparaison
+      if (comparisonChartData.value.length > 0) {
+        calculateComparisonPrediction();
+      }
     } else {
       comparisonChartData.value = [];
+      comparisonVolumeData.value = [];
+      comparisonMarketCapData.value = [];
+      comparisonPredictionData.value = [];
     }
 
     nextTick(() => {
@@ -513,6 +543,7 @@ function renderCoursChart() {
     name: cryptoData.value.name,
     data: chartData.value,
     color: isUp ? '#16a34a' : '#dc2626',
+    yAxis: 0,
     fillColor: {
       linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
       stops: [
@@ -522,13 +553,44 @@ function renderCoursChart() {
     },
   }];
 
-  // Ajouter la série de comparaison si activée
+  // Configuration des axes Y
+  let yAxisConfig = [{
+    title: {
+      text: cryptoData.value.name,
+      style: { color: isUp ? '#16a34a' : '#dc2626', fontWeight: 'bold' }
+    },
+    labels: {
+      style: { color: isUp ? '#16a34a' : '#dc2626' },
+      formatter: function() {
+        return this.value.toLocaleString('fr-FR') + (currency.value === 'usd' ? ' $' : ' €');
+      }
+    },
+    gridLineColor: '#1e293b',
+    opposite: false
+  }];
+
+  // Si pas de comparaison, calculer une échelle dynamique pour mieux voir les variations
+  if (!comparison.value || comparisonChartData.value.length === 0) {
+    const prices = chartData.value.map(d => d[1]);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const range = maxPrice - minPrice;
+    const margin = range * 0.05; // Marge de 5% pour une meilleure visualisation
+
+    yAxisConfig[0].min = minPrice - margin;
+    yAxisConfig[0].max = maxPrice + margin;
+  }
+
+  // Ajouter la série de comparaison si activée avec un deuxième axe Y
   if (comparison.value && comparisonChartData.value.length > 0) {
     const compIsUp = comparisonChartData.value[comparisonChartData.value.length - 1][1] > comparisonChartData.value[0][1];
+    const compColor = compIsUp ? '#3b82f6' : '#f59e0b';
+
     series.push({
       name: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1),
       data: comparisonChartData.value,
-      color: compIsUp ? '#3b82f6' : '#f59e0b',
+      color: compColor,
+      yAxis: 1,
       fillColor: {
         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
         stops: [
@@ -536,6 +598,22 @@ function renderCoursChart() {
           [1, 'rgba(0, 0, 0, 0)']
         ]
       },
+    });
+
+    // Ajouter un deuxième axe Y pour la crypto de comparaison
+    yAxisConfig.push({
+      title: {
+        text: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1),
+        style: { color: compColor, fontWeight: 'bold' }
+      },
+      labels: {
+        style: { color: compColor },
+        formatter: function() {
+          return this.value.toLocaleString('fr-FR') + (currency.value === 'usd' ? ' $' : ' €');
+        }
+      },
+      gridLineColor: 'transparent',
+      opposite: true
     });
   }
 
@@ -558,24 +636,17 @@ function renderCoursChart() {
       gridLineColor: '#1e293b',
       lineColor: '#334155'
     },
-    yAxis: {
-      title: { text: null },
-      labels: {
-        style: { color: '#94a3b8' },
-        formatter: function() {
-          return this.value.toLocaleString('fr-FR') + (currency.value === 'usd' ? ' $' : ' €');
-        }
-      },
-      gridLineColor: '#1e293b'
-    },
+    yAxis: yAxisConfig,
     tooltip: {
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
       style: { color: '#ffffff' },
       shared: true,
+      crosshairs: true,
+      split: false,
       formatter: function() {
         let tooltip = '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>';
         this.points.forEach(point => {
-          tooltip += '<span style="color:' + point.color + '">\u25CF</span> ' +
+          tooltip += '<span style="color:' + point.color + '">●</span> ' +
                      point.series.name + ': <b>' +
                      point.y.toLocaleString('fr-FR', {
                        minimumFractionDigits: 2,
@@ -588,8 +659,18 @@ function renderCoursChart() {
     plotOptions: {
       area: {
         lineWidth: 2,
-        marker: { enabled: false },
-        states: { hover: { lineWidth: 2 } }
+        marker: {
+          enabled: true,
+          radius: 3,
+          states: {
+            hover: {
+              enabled: true,
+              radius: 5
+            }
+          }
+        },
+        stickyTracking: false,
+        states: { hover: { lineWidth: 3 } }
       }
     },
     series: series,
@@ -677,6 +758,53 @@ function renderTradingChart() {
 function renderVolumeChart() {
   if (volumeData.value.length === 0) return;
 
+  const series = [{
+    name: cryptoData.value.name + ' Volume',
+    data: volumeData.value,
+    color: '#3b82f6',
+    yAxis: 0
+  }];
+
+  let yAxisConfig = [{
+    title: {
+      text: cryptoData.value.name,
+      style: { color: '#3b82f6', fontWeight: 'bold' }
+    },
+    labels: {
+      style: { color: '#3b82f6' },
+      formatter: function() {
+        return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
+      }
+    },
+    gridLineColor: '#1e293b',
+    opposite: false
+  }];
+
+  // Ajouter la comparaison si activée
+  if (comparison.value && comparisonVolumeData.value.length > 0) {
+    series.push({
+      name: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1) + ' Volume',
+      data: comparisonVolumeData.value,
+      color: '#f59e0b',
+      yAxis: 1
+    });
+
+    yAxisConfig.push({
+      title: {
+        text: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1),
+        style: { color: '#f59e0b', fontWeight: 'bold' }
+      },
+      labels: {
+        style: { color: '#f59e0b' },
+        formatter: function() {
+          return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
+        }
+      },
+      gridLineColor: 'transparent',
+      opposite: true
+    });
+  }
+
   Highcharts.chart('crypto-detail-chart', {
     chart: {
       type: 'column',
@@ -686,40 +814,40 @@ function renderVolumeChart() {
     },
     title: { text: null },
     credits: { enabled: false },
+    legend: {
+      enabled: comparison.value !== '',
+      itemStyle: { color: '#94a3b8' }
+    },
     xAxis: {
       type: 'datetime',
       labels: { style: { color: '#94a3b8' } },
       gridLineColor: '#1e293b',
       lineColor: '#334155'
     },
-    yAxis: {
-      title: { text: null },
-      labels: {
-        style: { color: '#94a3b8' },
-        formatter: function() {
-          return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
-        }
-      },
-      gridLineColor: '#1e293b'
-    },
+    yAxis: yAxisConfig,
     tooltip: {
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
       style: { color: '#ffffff' },
+      shared: true,
+      crosshairs: true,
+      split: false,
       formatter: function() {
-        return '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>' +
-               'Volume: <b>' + (this.y / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€') + '</b>';
+        let tooltip = '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>';
+        this.points.forEach(point => {
+          tooltip += '<span style="color:' + point.color + '">●</span> ' +
+                     point.series.name + ': <b>' +
+                     (point.y / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€') + '</b><br/>';
+        });
+        return tooltip;
       }
     },
     plotOptions: {
       column: {
-        color: '#3b82f6',
         borderWidth: 0,
+        stickyTracking: false
       }
     },
-    series: [{
-      name: 'Volume',
-      data: volumeData.value,
-    }]
+    series: series
   });
 }
 
@@ -728,6 +856,82 @@ function renderCapitalizationChart() {
   if (marketCapData.value.length === 0) return;
 
   const isUp = marketCapData.value[marketCapData.value.length - 1][1] > marketCapData.value[0][1];
+
+  const series = [{
+    name: cryptoData.value.name,
+    data: marketCapData.value,
+    color: isUp ? '#16a34a' : '#dc2626',
+    yAxis: 0,
+    fillColor: {
+      linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+      stops: [
+        [0, isUp ? 'rgba(22, 163, 74, 0.4)' : 'rgba(220, 38, 38, 0.4)'],
+        [1, 'rgba(0, 0, 0, 0)']
+      ]
+    },
+  }];
+
+  let yAxisConfig = [{
+    title: {
+      text: cryptoData.value.name,
+      style: { color: isUp ? '#16a34a' : '#dc2626', fontWeight: 'bold' }
+    },
+    labels: {
+      style: { color: isUp ? '#16a34a' : '#dc2626' },
+      formatter: function() {
+        return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
+      }
+    },
+    gridLineColor: '#1e293b',
+    opposite: false
+  }];
+
+  // Si pas de comparaison, calculer une échelle dynamique
+  if (!comparison.value || comparisonMarketCapData.value.length === 0) {
+    const caps = marketCapData.value.map(d => d[1]);
+    const minCap = Math.min(...caps);
+    const maxCap = Math.max(...caps);
+    const range = maxCap - minCap;
+    const margin = range * 0.05;
+
+    yAxisConfig[0].min = minCap - margin;
+    yAxisConfig[0].max = maxCap + margin;
+  }
+
+  // Ajouter la comparaison si activée
+  if (comparison.value && comparisonMarketCapData.value.length > 0) {
+    const compIsUp = comparisonMarketCapData.value[comparisonMarketCapData.value.length - 1][1] > comparisonMarketCapData.value[0][1];
+    const compColor = compIsUp ? '#3b82f6' : '#f59e0b';
+
+    series.push({
+      name: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1),
+      data: comparisonMarketCapData.value,
+      color: compColor,
+      yAxis: 1,
+      fillColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0, compIsUp ? 'rgba(59, 130, 246, 0.3)' : 'rgba(245, 158, 11, 0.3)'],
+          [1, 'rgba(0, 0, 0, 0)']
+        ]
+      },
+    });
+
+    yAxisConfig.push({
+      title: {
+        text: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1),
+        style: { color: compColor, fontWeight: 'bold' }
+      },
+      labels: {
+        style: { color: compColor },
+        formatter: function() {
+          return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
+        }
+      },
+      gridLineColor: 'transparent',
+      opposite: true
+    });
+  }
 
   Highcharts.chart('crypto-detail-chart', {
     chart: {
@@ -738,49 +942,51 @@ function renderCapitalizationChart() {
     },
     title: { text: null },
     credits: { enabled: false },
+    legend: {
+      enabled: comparison.value !== '',
+      itemStyle: { color: '#94a3b8' }
+    },
     xAxis: {
       type: 'datetime',
       labels: { style: { color: '#94a3b8' } },
       gridLineColor: '#1e293b',
       lineColor: '#334155'
     },
-    yAxis: {
-      title: { text: null },
-      labels: {
-        style: { color: '#94a3b8' },
-        formatter: function() {
-          return (this.value / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€');
-        }
-      },
-      gridLineColor: '#1e293b'
-    },
+    yAxis: yAxisConfig,
     tooltip: {
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
       style: { color: '#ffffff' },
+      shared: true,
+      crosshairs: true,
+      split: false,
       formatter: function() {
-        return '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>' +
-               'Market Cap: <b>' + (this.y / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€') + '</b>';
+        let tooltip = '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>';
+        this.points.forEach(point => {
+          tooltip += '<span style="color:' + point.color + '">●</span> ' +
+                     point.series.name + ': <b>' +
+                     (point.y / 1000000000).toFixed(2) + 'B ' + (currency.value === 'usd' ? '$' : '€') + '</b><br/>';
+        });
+        return tooltip;
       }
     },
     plotOptions: {
       area: {
         lineWidth: 2,
-        marker: { enabled: false },
+        marker: {
+          enabled: true,
+          radius: 3,
+          states: {
+            hover: {
+              enabled: true,
+              radius: 5
+            }
+          }
+        },
+        stickyTracking: false,
         states: { hover: { lineWidth: 2 } }
       }
     },
-    series: [{
-      name: 'Capitalisation',
-      data: marketCapData.value,
-      color: isUp ? '#16a34a' : '#dc2626',
-      fillColor: {
-        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-        stops: [
-          [0, isUp ? 'rgba(22, 163, 74, 0.4)' : 'rgba(220, 38, 38, 0.4)'],
-          [1, 'rgba(0, 0, 0, 0)']
-        ]
-      },
-    }]
+    series: series
   });
 }
 
@@ -799,7 +1005,7 @@ function calculatePrediction() {
     historyPoints = Math.min(30, chartData.value.length);
     futurePoints = 15; // Prédire 15 jours
   } else if (period.value === '365') {
-    historyPoints = Math.min(60, chartData.value.length);
+    historyPoints = Math.min(90, chartData.value.length);
     futurePoints = 30; // Prédire 30 jours
   }
 
@@ -823,7 +1029,13 @@ function calculatePrediction() {
 
   // Générer les points de prédiction
   const predictionPoints = [];
-  const timeInterval = recentData[1][0] - recentData[0][0];
+
+  // Calculer l'intervalle de temps moyen pour plus de précision
+  const timeIntervals = [];
+  for (let i = 1; i < Math.min(10, recentData.length); i++) {
+    timeIntervals.push(recentData[i][0] - recentData[i-1][0]);
+  }
+  const timeInterval = timeIntervals.reduce((a, b) => a + b, 0) / timeIntervals.length;
 
   // Ajouter les données historiques récentes
   predictionData.value = [...recentData];
@@ -833,7 +1045,7 @@ function calculatePrediction() {
     const futureTimestamp = lastTimestamp + (timeInterval * i);
     const predictedPrice = intercept + slope * (n + i - 1);
 
-    // Ajouter une légère variation aléatoire pour rendre la prédiction plus réaliste
+    // Ajouter une variation aléatoire pour rendre la prédiction plus réaliste
     const variance = predictedPrice * 0.02; // 2% de variance
     const adjustment = (Math.random() - 0.5) * variance;
 
@@ -841,6 +1053,61 @@ function calculatePrediction() {
   }
 
   predictionData.value = [...predictionData.value, ...predictionPoints];
+}
+
+// Calculer la prédiction pour la comparaison
+function calculateComparisonPrediction() {
+  if (comparisonChartData.value.length < 10) return;
+
+  let historyPoints = 30;
+  let futurePoints = 15;
+
+  if (period.value === '7') {
+    historyPoints = Math.min(20, comparisonChartData.value.length);
+    futurePoints = 7;
+  } else if (period.value === '30') {
+    historyPoints = Math.min(30, comparisonChartData.value.length);
+    futurePoints = 15;
+  } else if (period.value === '365') {
+    historyPoints = Math.min(90, comparisonChartData.value.length);
+    futurePoints = 30;
+  }
+
+  const recentData = comparisonChartData.value.slice(-historyPoints);
+  const lastTimestamp = recentData[recentData.length - 1][0];
+
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+  const n = recentData.length;
+
+  recentData.forEach((point, i) => {
+    sumX += i;
+    sumY += point[1];
+    sumXY += i * point[1];
+    sumX2 += i * i;
+  });
+
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+
+  const predictionPoints = [];
+  const timeIntervals = [];
+  for (let i = 1; i < Math.min(10, recentData.length); i++) {
+    timeIntervals.push(recentData[i][0] - recentData[i-1][0]);
+  }
+  const timeInterval = timeIntervals.reduce((a, b) => a + b, 0) / timeIntervals.length;
+
+  comparisonPredictionData.value = [...recentData];
+
+  for (let i = 1; i <= futurePoints; i++) {
+    const futureTimestamp = lastTimestamp + (timeInterval * i);
+    const predictedPrice = intercept + slope * (n + i - 1);
+    const variance = predictedPrice * 0.02;
+    const adjustment = (Math.random() - 0.5) * variance;
+
+    predictionPoints.push([futureTimestamp, predictedPrice + adjustment]);
+  }
+
+  comparisonPredictionData.value = [...comparisonPredictionData.value, ...predictionPoints];
 }
 
 // Graphique Prédiction
@@ -854,7 +1121,7 @@ function renderPredictionChart() {
   } else if (period.value === '30') {
     historyPoints = 30;
   } else if (period.value === '365') {
-    historyPoints = 60;
+    historyPoints = 90;
   }
 
   const recentDataLength = Math.min(historyPoints, predictionData.value.length - 1);
@@ -862,6 +1129,46 @@ function renderPredictionChart() {
   const futureData = predictionData.value.slice(recentDataLength - 1);
 
   const isUp = futureData[futureData.length - 1][1] > historicalData[historicalData.length - 1][1];
+
+  const series = [
+    {
+      name: cryptoData.value.name + ' Historique',
+      data: historicalData,
+      color: '#3b82f6',
+      zIndex: 2
+    },
+    {
+      name: cryptoData.value.name + ' Prédiction',
+      data: futureData,
+      color: isUp ? '#16a34a' : '#dc2626',
+      dashStyle: 'ShortDash',
+      zIndex: 1
+    }
+  ];
+
+  // Ajouter la comparaison si activée
+  if (comparison.value && comparisonPredictionData.value.length > 0) {
+    const compRecentDataLength = Math.min(historyPoints, comparisonPredictionData.value.length - 1);
+    const compHistoricalData = comparisonPredictionData.value.slice(0, compRecentDataLength);
+    const compFutureData = comparisonPredictionData.value.slice(compRecentDataLength - 1);
+    const compIsUp = compFutureData[compFutureData.length - 1][1] > compHistoricalData[compHistoricalData.length - 1][1];
+
+    series.push(
+      {
+        name: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1) + ' Historique',
+        data: compHistoricalData,
+        color: '#a855f7',
+        zIndex: 2
+      },
+      {
+        name: comparison.value.charAt(0).toUpperCase() + comparison.value.slice(1) + ' Prédiction',
+        data: compFutureData,
+        color: compIsUp ? '#10b981' : '#f59e0b',
+        dashStyle: 'ShortDash',
+        zIndex: 1
+      }
+    );
+  }
 
   Highcharts.chart('crypto-detail-chart', {
     chart: {
@@ -906,6 +1213,8 @@ function renderPredictionChart() {
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
       style: { color: '#ffffff' },
       shared: true,
+      crosshairs: true,
+      split: false,
       formatter: function() {
         let tooltip = '<b>' + Highcharts.dateFormat('%e %b %Y', this.x) + '</b><br/>';
         this.points.forEach(point => {
@@ -922,25 +1231,21 @@ function renderPredictionChart() {
     plotOptions: {
       line: {
         lineWidth: 2,
-        marker: { enabled: false },
+        marker: {
+          enabled: true,
+          radius: 3,
+          states: {
+            hover: {
+              enabled: true,
+              radius: 5
+            }
+          }
+        },
+        stickyTracking: false,
         states: { hover: { lineWidth: 2 } }
       }
     },
-    series: [
-      {
-        name: 'Historique',
-        data: historicalData,
-        color: '#3b82f6',
-        zIndex: 2
-      },
-      {
-        name: 'Prédiction',
-        data: futureData,
-        color: isUp ? '#16a34a' : '#dc2626',
-        dashStyle: 'ShortDash',
-        zIndex: 1
-      }
-    ]
+    series: series
   });
 }
 
@@ -977,6 +1282,20 @@ watch(() => route.params.id, async (newId) => {
     await fetchChartData();
     await fetchRelatedCryptos();
   }
+});
+
+// Watch pour changement de période, comparaison ou devise avec debounce
+let filterTimeout = null;
+watch([period, comparison, currency], async () => {
+  // Annuler le timeout précédent
+  if (filterTimeout) {
+    clearTimeout(filterTimeout);
+  }
+
+  // Attendre 300ms avant de faire la requête pour éviter trop d'appels
+  filterTimeout = setTimeout(async () => {
+    await updateChart();
+  }, 300);
 });
 </script>
 
