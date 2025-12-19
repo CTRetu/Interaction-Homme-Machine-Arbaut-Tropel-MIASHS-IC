@@ -144,10 +144,10 @@ onMounted(() => {
 .nav-container {
   max-width: 1300px;
   margin: auto;
-  padding: 8px 20px;
+  padding: 6px 16px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
 }
 
 /* ---------- LOGO ---------- */
@@ -160,41 +160,42 @@ onMounted(() => {
 }
 
 .header-logo {
-  width: 28px;
+  width: 24px;
 }
 
 .nav-logo h1 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--primary);
 }
 
 /* ---------- SEARCH ---------- */
 
+
 .search-bar {
   flex: 1;
-  max-width: 450px;
+  max-width: 460px;
   display: flex;
   align-items: center;
-  background: var(--bg-body);
-  border: 2px solid transparent;
-  border-radius: 20px;
-  padding: 6px 14px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  gap: 10px;
+  height: 34px;
+  background: transparent;
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 4px 10px;
+  transition: box-shadow 0.2s ease;
+  box-shadow: none;
+  position: static !important;
 }
 
-.search-bar:focus-within {
-  border-color: var(--primary);
-  background: var(--bg-secondary);
-  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.15);
-  transform: translateY(-1px);
-}
+.search-bar:focus-within { box-shadow: none; }
 
 .search-icon {
-  width: 18px;
+  width: 16px;
   color: var(--text-light);
   transition: color 0.3s ease;
+  position: static !important;
+  flex: 0 0 auto;
 }
 
 .search-bar:focus-within .search-icon {
@@ -202,19 +203,24 @@ onMounted(() => {
 }
 
 .search-bar input {
-  border: none;
+  border: none !important;
   outline: none;
-  background: transparent;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 5px 0 0 0 !important;
   color: var(--text-color);
-  margin-left: 10px;
+  margin-left: 0 !important;
+  height: 26px;
+  line-height: 26px; 
   width: 100%;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 .search-bar input::placeholder {
   color: var(--text-light);
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 /* ---------- NAV ---------- */
