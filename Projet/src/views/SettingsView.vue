@@ -250,9 +250,8 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
         <tbody>
           <!-- Gestion globale -->
           <tr>
-          <td class="notif-category-title notif-text">Gestion de toutes les notifications</td>
-          <td>
-            <div class="toggle-cell">
+          <td class="notif-category-title notif-label">Gestion de toutes les notifications</td>
+          <td class="notif-buttons-cell">
               <div class="notif-group-selector-inline">
                 <button
                   :class="{ active: notificationGroupPortfolio === 'all' }"
@@ -269,77 +268,76 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
                   disabled
                 >Personnalisé</button>
               </div>
-            </div>
           </td>
         </tr>
 
         <!-- Variation portefeuille -->
         <tr>
-          <td colspan="2" class="notif-category-title notif-text">Variation du portefeuille</td>
+          <td colspan="2" class="notif-category-title notif-label">Variation du portefeuille</td>
         </tr>
 
         <tr>
-          <td class="notif-text">Gains</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Gains</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.gains" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td class="notif-text">Pertes</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Pertes</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.pertes" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <!-- Communauté -->
         <tr>
-          <td colspan="2" class="notif-category-title notif-text">Communauté</td>
+          <td colspan="2" class="notif-category-title notif-label">Communauté</td>
         </tr>
 
         <tr>
-          <td class="notif-text">Recommandations d’articles</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Recommandations d’articles</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.recommandations_articles" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td class="notif-text">Commentaires sous vos articles</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Commentaires sous vos articles</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.commentaires" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td class="notif-text">Réponses à vos commentaires</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Réponses à vos commentaires</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.reponses" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td class="notif-text">Demandes de suivi</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Demandes de suivi</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.demandes_suivi" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <tr>
-          <td class="notif-text">Activités des personnes suivies</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Activités des personnes suivies</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.activites_suivies" @change="updatePortfolioGroup" />
           </td>
         </tr>
 
         <!-- Recommandations crypto -->
         <tr>
-          <td colspan="2" class="notif-category-title notif-text">Recommandations crypto</td>
+          <td colspan="2" class="notif-category-title notif-label">Recommandations crypto</td>
         </tr>
 
         <tr>
-          <td class="notif-text">Recommandations du jour</td>
-          <td class="toggle-cell">
+          <td class="notif-label">Recommandations du jour</td>
+          <td class="notif-buttons-cell">
             <ToggleSwitch v-model="notificationsPortfolio.recommandations_crypto" @change="updatePortfolioGroup" />
           </td>
         </tr>
@@ -347,7 +345,7 @@ Vous pouvez ajouter, retirer ou déplacer les éléments.">
       </table>
     </section>
 
-    <button class="btn-save" @click="$router.push('/')">
+    <button class="btn-save" @click="saveSettings">
       Enregistrer les modifications
     </button>
 
@@ -564,6 +562,9 @@ export default {
     if (current) {
       this.userPseudo = current.pseudo;
       this.userEmail = current.email;
+
+      // Charger les paramètres de notification de l'utilisateur
+      this.loadNotificationSettings(current.email);
     }
 
     // Charger le dashboard depuis le store Pinia
@@ -1120,6 +1121,43 @@ export default {
       } else {
         this.notificationGroupPortfolio = "custom"
       }
+    },
+
+    /* ---------- Sauvegarde et chargement des paramètres de notification ---------- */
+    saveNotificationSettings(userEmail) {
+      if (!userEmail) return;
+
+      // Récupérer tous les paramètres de notification de tous les utilisateurs
+      let allNotificationSettings = JSON.parse(localStorage.getItem("notificationSettings")) || {};
+
+      // Sauvegarder les paramètres pour cet utilisateur
+      allNotificationSettings[userEmail] = {
+        notificationGroupPortfolio: this.notificationGroupPortfolio,
+        notificationsPortfolio: { ...this.notificationsPortfolio }
+      };
+
+      localStorage.setItem("notificationSettings", JSON.stringify(allNotificationSettings));
+    },
+
+    loadNotificationSettings(userEmail) {
+      if (!userEmail) return;
+
+      // Récupérer les paramètres de notification de cet utilisateur
+      const allNotificationSettings = JSON.parse(localStorage.getItem("notificationSettings")) || {};
+      const userSettings = allNotificationSettings[userEmail];
+
+      if (userSettings) {
+        this.notificationGroupPortfolio = userSettings.notificationGroupPortfolio || "all";
+        this.notificationsPortfolio = { ...userSettings.notificationsPortfolio };
+      }
+    },
+
+    saveSettings() {
+      const current = JSON.parse(localStorage.getItem("currentUser"));
+      if (current) {
+        this.saveNotificationSettings(current.email);
+      }
+      this.$router.push('/');
     }
 
 
@@ -1580,4 +1618,29 @@ html.dark .add-menu-item:hover,
   color: white;
 }
 
+.notif-category-title {
+  padding-top: 15px;
+  padding-bottom: 4px;
+  font-weight: bold;
+  color: #d18c00;
+}
+
+.notif-label {
+  text-align: left !important;
+}
+
+.notif-buttons-cell {
+  text-align: right;
+  padding: 10px 6px;
+  vertical-align: middle;
+}
+
+.notif-group-selector-inline {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
 </style>
+
+
