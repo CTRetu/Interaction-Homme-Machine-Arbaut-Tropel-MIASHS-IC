@@ -256,18 +256,36 @@
         </div>
       </div>
 
-      <button class="btn-see-more">Voir plus</button>
+      <RouterLink to="/crypto-table" class="btn-see-more">Voir plus →</RouterLink>
     </section>
 
-    <!-- COMMENTAIRES -->
-    <section class="card comments-section">
-      <h3>Commentaires</h3>
+    <!-- Commentaires -->
+    <section class="comments card">
+      <h2>Commentaires</h2>
 
-      <textarea placeholder="Se connecter pour écrire un commentaire..."></textarea>
+      <!-- UTILISATEUR CONNECTÉ -->
+      <div v-if="currentUser">
+        <textarea
+          v-model="newComment"
+          placeholder="Écrire un commentaire..."
+        ></textarea>
 
-      <div class="comment" v-for="com in comments" :key="com.id">
-        <p><strong>@{{ com.user }}</strong></p>
-        <p>{{ com.text }}</p>
+        <button class="btn-primary" @click="addComment">
+          Publier
+        </button>
+        <br/>
+        <br/>
+      </div>
+
+      <!-- UTILISATEUR NON CONNECTÉ -->
+      <p v-else class="text-muted">
+        Vous devez être connecté pour écrire un commentaire.
+      </p>
+
+      <!-- LISTE DES COMMENTAIRES -->
+      <div class="comment" v-for="c in comments" :key="c.id">
+        <p class="author">@{{ c.author }}</p>
+        <p class="text">{{ c.text }}</p>
       </div>
 
       <button class="btn-see-more">Voir plus</button>
@@ -312,6 +330,30 @@ const predictionData = ref([]);
 const comparisonPredictionData = ref([]);
 const relatedCryptos = ref([]);
 
+/* UTILISATEUR CONNECTÉ (même logique que ArticleView) */
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+/* COMMENTAIRES (persistants par crypto) */
+const newComment = ref("");
+const comments = ref([]);
+const storageKey = computed(() => `comments_crypto_${cryptoId.value}`);
+
+function loadComments() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(storageKey.value) || "[]");
+    comments.value = Array.isArray(stored) ? stored : [];
+  } catch {
+    comments.value = [];
+  }
+}
+
+function addComment() {
+  if (!newComment.value.trim() || !currentUser) return;
+  comments.value.push({ id: Date.now(), author: currentUser.pseudo, text: newComment.value });
+  localStorage.setItem(storageKey.value, JSON.stringify(comments.value));
+  newComment.value = "";
+}
+
 /* BUY LINKS (CLIQUABLES) */
 const buyLinks = [
   { name: "Binance", url: "https://www.binance.com" },
@@ -319,12 +361,7 @@ const buyLinks = [
   { name: "eToro", url: "https://www.etoro.com" },
 ];
 
-/* COMMENTAIRES */
-const comments = [
-  { id: 1, user: "tutu", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-  { id: 2, user: "gfd", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-  { id: 3, user: "qthj", text: "XXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
-];
+/* (Ancien tableau de commentaires supprimé au profit du stockage persistant) */
 
 /* CONVERTISSEUR */
 const convertedValue = computed(() => {
@@ -1273,6 +1310,7 @@ onMounted(async () => {
   await fetchCryptoData();
   await fetchChartData();
   await fetchRelatedCryptos();
+  loadComments();
 });
 
 // Watch pour changement de route
@@ -1281,6 +1319,7 @@ watch(() => route.params.id, async (newId) => {
     await fetchCryptoData();
     await fetchChartData();
     await fetchRelatedCryptos();
+    loadComments();
   }
 });
 
@@ -1577,11 +1616,11 @@ watch([period, comparison, currency], async () => {
 /* ————————————————————————————————
    COMMENTAIRES
 ———————————————————————————————— */
-.comments-section h3 {
+.comments h2 {
   color: var(--primary);
 }
 
-.comments-section textarea {
+.comments textarea {
   width: 100%;
   height: 120px;
   border-radius: 8px;
@@ -1605,10 +1644,25 @@ watch([period, comparison, currency], async () => {
 .btn-see-more {
   padding: 8px 12px;
   background: var(--primary);
-  color: #000;
+  color: #fff;
   border-radius: 6px;
   margin-top: 12px;
   font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-see-more:hover,
+.btn-see-more:focus,
+.btn-see-more:active,
+.btn-see-more:visited {
+  text-decoration: none;
+  color: #fff;
+}
+
+/* Ensure publish button text is white */
+.comments .btn-primary {
+  color: #fff;
 }
 
 
@@ -1663,7 +1717,7 @@ watch([period, comparison, currency], async () => {
 /* Bouton Voir plus */
 :root.dark .btn-see-more {
   background: var(--primary);
-  color: #000;
+  color: #fff;
 }
 
 /* -------------------------------------------------------------------
@@ -1712,7 +1766,7 @@ watch([period, comparison, currency], async () => {
 /* Bouton voir plus */
 :root.light .btn-see-more {
   background: var(--primary);
-  color: #000;
+  color: #fff;
 }
 
 /* Arrow couleurs (restent identiques) */

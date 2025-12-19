@@ -300,54 +300,51 @@ nav a:hover {
 }
 
 
-/* 🌙 DARK MODE — tableau crypto */
-@media (prefers-color-scheme: dark) {
-  
-  .crypto-table {
-    background: rgba(30, 30, 30, 0.6); /* foncé + semi transparent */
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(4px);
-  }
+/* 🌙 DARK MODE — tableau crypto (piloté par html.dark) */
+html.dark .crypto-table {
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+}
 
-  .crypto-table thead tr {
-    background: rgba(200, 160, 90, 0.25); /* beige mais foncé + transparent */
-  }
+html.dark .crypto-table thead tr {
+  background: rgba(200, 160, 90, 0.25);
+}
 
-  .crypto-table th {
-    color: #f2e4c1; /* beige clair lisible */
-  }
+html.dark .crypto-table th {
+  color: #f2e4c1;
+}
 
-  .crypto-table td {
-    color: #eee;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  }
+html.dark .crypto-table td {
+  color: #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
 
-  .crypto-table tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.03);
-  }
+html.dark .crypto-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
 
-  /* Icônes crypto plus visibles */
-  .coin-ico {
-    filter: brightness(1.2);
-  }
+/* Icônes crypto plus visibles */
+html.dark .crypto-table .coin-ico {
+  filter: brightness(1.2);
+}
 
-  /* Sparkline */
-  .sparkline.green {
-    background: url('https://dummyimage.com/80x22/0e8f3f/ffffff&text=~') center/cover;
-  }
+/* Sparkline */
+html.dark .crypto-table .sparkline.green {
+  background: url('https://dummyimage.com/80x22/0e8f3f/ffffff&text=~') center/cover;
+}
 
-  .sparkline.red {
-    background: url('https://dummyimage.com/80x22/b50000/ffffff&text=~') center/cover;
-  }
+html.dark .crypto-table .sparkline.red {
+  background: url('https://dummyimage.com/80x22/b50000/ffffff&text=~') center/cover;
+}
 
-  /* Couleurs montantes et descendantes */
-  .up {
-    color: #00d83a;
-  }
+/* Couleurs montantes et descendantes */
+html.dark .crypto-table .up {
+  color: #00d83a;
+}
 
-  .down {
-    color: #ff3a3a;
-  }
+html.dark .crypto-table .down {
+  color: #ff3a3a;
 }
 
 /* Valeur en hausse */
@@ -393,21 +390,19 @@ nav a:hover {
   border-top: 7px solid #e60000; /* triangle vers le bas */
 }
 
-/* Ajuste les couleurs en dark mode */
-@media (prefers-color-scheme: dark) {
-  .crypto-table td.up {
-    color: #00d83a;
-  }
-  .crypto-table td.up::before {
-    border-bottom-color: #00d83a;
-  }
+/* Ajuste les couleurs en dark mode (piloté par html.dark) */
+html.dark .crypto-table td.up {
+  color: #00d83a;
+}
+html.dark .crypto-table td.up::before {
+  border-bottom-color: #00d83a;
+}
 
-  .crypto-table td.down {
-    color: #ff3a3a;
-  }
-  .crypto-table td.down::before {
-    border-top-color: #ff3a3a;
-  }
+html.dark .crypto-table td.down {
+  color: #ff3a3a;
+}
+html.dark .crypto-table td.down::before {
+  border-top-color: #ff3a3a;
 }
 
 
@@ -499,6 +494,40 @@ nav a:hover {
 .btn-see-more {
   font-size: 14px;
   padding: 6px 12px;
+}
+/* ----------------------------------------------------------
+   Pagination (CryptoTableView)
+----------------------------------------------------------- */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.pagination span {
+  color: var(--text-color);
+}
+
+.pagination button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.pagination button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 /* ----------------------------------------------------------
    PAGE REGISTER : compatible dark/light
@@ -1198,20 +1227,25 @@ td:nth-child(2) {
 
 .pagination button {
   padding: 8px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 700;
+  transition: background 0.2s ease, opacity 0.2s ease;
 }
 
 .pagination button:disabled {
-  background: #ccc;
+  background: #e0e0e0;
+  color: #9a9a9a;
   cursor: not-allowed;
+  border-color: #e0e0e0;
 }
 
 .pagination span {
   font-weight: bold;
+  color: var(--text-color);
 }
 
 /* Dark mode for crypto table */
@@ -1225,13 +1259,19 @@ html.dark td {
 }
 
 html.dark .pagination button {
-  background: #f2b45b;
+  background: var(--primary);
   color: #1b1b1b;
+  border-color: var(--border-color);
+}
+
+html.dark .pagination button:hover:not(:disabled) {
+  background: var(--primary-hover);
 }
 
 html.dark .pagination button:disabled {
   background: #555;
   color: #ccc;
+  border-color: #555;
 }
 
 html.dark .sort-container select {

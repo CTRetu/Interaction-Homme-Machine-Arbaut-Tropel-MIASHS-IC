@@ -12,7 +12,6 @@
 
       <p class="meta">
         <strong>Auteur :</strong> @{{ article.author }}
-        <button class="btn-follow">Suivre l’auteur</button>
       </p>
     </section>
 
@@ -35,6 +34,8 @@
         <button class="btn-primary" @click="addComment">
           Publier
         </button>
+        <br/>
+        <br/>
       </div>
 
       <!-- UTILISATEUR NON CONNECTÉ -->

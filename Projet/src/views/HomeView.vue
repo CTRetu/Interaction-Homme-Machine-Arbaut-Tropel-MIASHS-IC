@@ -24,11 +24,28 @@
             <div v-if="dashboardWidgets[widgetId]?.type === 'number'" class="widget-number">
               <div class="widget-content">
                 <h3 class="widget-title" :title="dashboardWidgets[widgetId].title">{{ dashboardWidgets[widgetId].title }}</h3>
-                <p class="widget-value" 
+                <p class="widget-value"
                    :class="{ 'positive': dashboardWidgets[widgetId].value.includes('+'), 'negative': dashboardWidgets[widgetId].value.includes('-') }"
                    :title="'Valeur actuelle : ' + dashboardWidgets[widgetId].value">
                   {{ dashboardWidgets[widgetId].value }}
                 </p>
+
+                <table class="mini-table">
+                  <tr v-for="row in getNumberWidgetPageRows(widgetId)" :key="row.key">
+                    <td>{{ row.label }}</td>
+                    <td class="right">{{ row.value }}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="table-pagination" v-if="getNumberWidgetTotalPages(widgetId) > 1">
+                <button @click="goToTablePage(widgetId, 1)">&laquo;</button>
+                <button @click="changeTablePage(widgetId, -1)">&lsaquo;</button>
+                <span>
+                  Page {{ tablePageByWidget[widgetId] || 1 }} / {{ getNumberWidgetTotalPages(widgetId) }}
+                </span>
+                <button @click="changeTablePage(widgetId, 1)">&rsaquo;</button>
+                <button @click="goToTablePage(widgetId, getNumberWidgetTotalPages(widgetId))">&raquo;</button>
               </div>
             </div>
 
@@ -36,30 +53,23 @@
             <div v-if="dashboardWidgets[widgetId]?.type === 'table'" class="widget-table">
               <div class="widget-content">
                 <h3 class="widget-title" :title="dashboardWidgets[widgetId].title">{{ dashboardWidgets[widgetId].title }}</h3>
-                
-                <!-- Table avec données du portefeuille (valeur détenue par crypto) -->
-                <table v-if="dashboardWidgets[widgetId].source === 'ownedCryptos'" class="mini-table">
-                  <tbody>
-                    <tr v-for="row in getPortfolioRows()" :key="row.symbol">
-                      <td :title="'Cryptomonnaie : ' + row.name">{{ row.name }}</td>
-                      <td class="right" :title="'Valeur détenue : ' + formatPrice(row.value)">{{ formatPrice(row.value) }}</td>
-                    </tr>
-                  </tbody>
+
+                <table class="mini-table">
+                  <tr v-for="row in getTablePageRows(widgetId)" :key="row.key">
+                    <td>{{ row.label }}</td>
+                    <td class="right" :class="{ 'positive': typeof row.value === 'string' && row.value.includes('HAUSSE'), 'negative': typeof row.value === 'string' && row.value.includes('VOLATILITÉ') }">{{ row.value }}</td>
+                  </tr>
                 </table>
-                
-                <!-- Table avec données statiques -->
-                <table v-else-if="dashboardWidgets[widgetId].source === 'static'" class="mini-table">
-                  <tbody>
-                    <tr v-for="row in dashboardWidgets[widgetId].rows" :key="row.key">
-                      <td :title="'Cryptomonnaie : ' + row.label">{{ row.label }}</td>
-                      <td class="right" 
-                          :class="{ 'positive': row.value.includes('HAUSSE') || row.value.includes('ÉLEVÉE'), 'negative': row.value.includes('VOLATILITÉ') }"
-                          :title="'Recommandation : ' + row.value">
-                        {{ row.value }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+              </div>
+
+              <div class="table-pagination" v-if="getTotalTablePages(widgetId) > 1">
+                <button @click="goToTablePage(widgetId, 1)">&laquo;</button>
+                <button @click="changeTablePage(widgetId, -1)">&lsaquo;</button>
+                <span>
+                  Page {{ tablePageByWidget[widgetId] || 1 }} / {{ getTotalTablePages(widgetId) }}
+                </span>
+                <button @click="changeTablePage(widgetId, 1)">&rsaquo;</button>
+                <button @click="goToTablePage(widgetId, getTotalTablePages(widgetId))">&raquo;</button>
               </div>
             </div>
 
@@ -398,6 +408,9 @@ const userPortfolio = ref([
 // Configuration du tableau de bord (synchronisée avec le store)
 const userDashboard = computed(() => userStore.dashboardConfig);
 
+// Pagination page per widget (tables + numbers)
+const tablePageByWidget = ref({});
+
 // Crypto sélectionnée par widget graphique
 const selectedCryptoByWidget = ref({});
 
@@ -406,14 +419,14 @@ const dashboardWidgets = ref({
   gain24h: {
     type: 'number',
     title: 'Gains / Pertes sur 24h',
-    value: '+ 8,54 %',
+    value: '+ 0,00 %',
     detailType: 'change24h',
     pageSize: 3
   },
   gainTotal: {
     type: 'number',
-    title: 'Valeur du portefeuille',
-    value: '0 $US',
+    title: 'Gains / Pertes totales',
+    value: '+ 0 $US',
     detailType: 'value',
     pageSize: 3
   },
@@ -434,7 +447,7 @@ const dashboardWidgets = ref({
   },
   investDetails: {
     type: 'table',
-    title: 'Mes investissements',
+    title: 'Détails investissements',
     source: 'ownedCryptos',
     pageSize: 3
   },
@@ -686,6 +699,16 @@ function formatPrice(value) {
     : "-";
 }
 
+function formatDollar(value) {
+  return value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function formatSigned(value) {
+  const sign = value > 0 ? '+' : value < 0 ? '-' : '';
+  const abs = Math.abs(value);
+  return `${sign}${abs}`;
+}
+
 function formatPercent(value) {
   return value !== undefined ? value.toFixed(2) + " %" : "-";
 }
@@ -714,7 +737,22 @@ function getPortfolioRows() {
 function calculateTotalPortfolioValue() {
   const rows = getPortfolioRows();
   const total = rows.reduce((sum, row) => sum + row.value, 0);
-  dashboardWidgets.value.gainTotal.value = formatPrice(total);
+
+  // Fictional invested total to mirror Settings
+  const investedTotal = 1000;
+  const diff = total - investedTotal;
+  dashboardWidgets.value.gainTotal.value = `${diff >= 0 ? '+' : '-'} ${formatDollar(Math.abs(Math.round(diff)))} $US`;
+
+  // Compute 24h weighted percent change for portfolio
+  const yesterdayTotal = rows.reduce((sum, row) => {
+    const pct = row.change24h || 0;
+    const factor = 1 + pct / 100;
+    const yesterday = factor !== 0 ? row.value / factor : row.value;
+    return sum + yesterday;
+  }, 0);
+  const pctChange = yesterdayTotal > 0 ? ((total - yesterdayTotal) / yesterdayTotal) * 100 : 0;
+  const pctFormatted = Math.abs(pctChange).toFixed(2).replace('.', ',');
+  dashboardWidgets.value.gain24h.value = `${pctChange >= 0 ? '+ ' : '- '}${pctFormatted} %`;
 }
 
 function renderDashboardCharts() {
@@ -771,12 +809,22 @@ function renderSingleDashboardChart(widgetId) {
   const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
   const gridColor = isDarkMode ? '#334155' : '#cbd5e1';
 
+  // Déterminer des positions de ticks lisibles pour l'axe des X
+  let tickPositions = undefined;
+  if (detailType === '24h') {
+    tickPositions = [0, 6, 12, 18, 23];
+  } else if (detailType === '3d') {
+    tickPositions = [0, 12, 24, 36, 48, 60, 71];
+  } else if (detailType === '7d') {
+    tickPositions = [0, 1, 2, 3, 4, 5, 6];
+  }
+
   Highcharts.chart(containerId, {
     chart: {
       type: 'line',
       backgroundColor: 'transparent',
-      height: 220,
-      margin: [15, 15, 45, 60]
+      height: 140,
+      margin: [10, 10, 36, 60]
     },
     title: { text: null },
     credits: { enabled: false },
@@ -786,8 +834,12 @@ function renderSingleDashboardChart(widgetId) {
       visible: true,
       lineColor: gridColor,
       tickColor: gridColor,
+      tickLength: 4,
+      tickPositions: tickPositions,
       labels: {
-        style: { color: textColor }
+        enabled: true,
+        style: { color: textColor, fontSize: '11px', fontWeight: '600' },
+        y: 14
       }
     },
     yAxis: {
@@ -795,7 +847,9 @@ function renderSingleDashboardChart(widgetId) {
       gridLineColor: gridColor,
       title: { text: '$US', style: { color: textColor } },
       labels: {
-        style: { color: textColor }
+        style: { color: textColor },
+        align: 'right',
+        x: 0
       }
     },
     tooltip: {
@@ -823,6 +877,88 @@ function onDashboardChartCryptoChange(widgetId) {
   renderSingleDashboardChart(widgetId);
 }
 
+// ---------- Tableaux paginés et widgets number ----------
+function getAllTableRows(widgetId) {
+  const widget = dashboardWidgets.value[widgetId];
+  if (!widget) return [];
+
+  if (widget.source === 'ownedCryptos') {
+    const rows = getPortfolioRows();
+    return rows.map(r => ({ key: r.symbol, label: `${r.name} (${r.symbol})`, value: `${formatDollar(Math.round(r.value))} $US` }));
+  }
+
+  if (widget.source === 'static') {
+    return widget.rows || [];
+  }
+
+  return widget.rows || [];
+}
+
+function getTablePageRows(widgetId) {
+  const widget = dashboardWidgets.value[widgetId];
+  if (!widget) return [];
+  const rows = getAllTableRows(widgetId);
+  const pageSize = widget.pageSize || 4;
+  const currentPage = tablePageByWidget.value[widgetId] || 1;
+  const start = (currentPage - 1) * pageSize;
+  return rows.slice(start, start + pageSize);
+}
+
+function getTotalTablePages(widgetId) {
+  const widget = dashboardWidgets.value[widgetId];
+  if (!widget) return 1;
+  if (widget.type === 'number') return getNumberWidgetTotalPages(widgetId);
+  const rows = getAllTableRows(widgetId);
+  const pageSize = widget.pageSize || 4;
+  return Math.max(1, Math.ceil(rows.length / pageSize));
+}
+
+function goToTablePage(widgetId, page) {
+  const total = getTotalTablePages(widgetId);
+  const p = Math.min(Math.max(page, 1), total);
+  tablePageByWidget.value[widgetId] = p;
+}
+
+function changeTablePage(widgetId, delta) {
+  const current = tablePageByWidget.value[widgetId] || 1;
+  goToTablePage(widgetId, current + delta);
+}
+
+function getNumberWidgetRows(widgetId) {
+  const widget = dashboardWidgets.value[widgetId];
+  if (!widget) return [];
+
+  if (widget.detailType === 'change24h') {
+    const rows = getPortfolioRows();
+    return rows.map(r => ({ key: r.symbol, label: r.symbol, value: `${formatSigned(Math.round(r.value * (r.change24h || 0) / 100))} $US` }));
+  }
+
+  if (widget.detailType === 'value') {
+    const rows = getPortfolioRows();
+    return rows.map(r => ({ key: r.symbol, label: r.symbol, value: `${formatDollar(Math.round(r.value))} $US` }));
+  }
+
+  return [];
+}
+
+function getNumberWidgetPageRows(widgetId) {
+  const widget = dashboardWidgets.value[widgetId];
+  if (!widget) return [];
+  const rows = getNumberWidgetRows(widgetId);
+  const pageSize = widget.pageSize || 4;
+  const currentPage = tablePageByWidget.value[widgetId] || 1;
+  const start = (currentPage - 1) * pageSize;
+  return rows.slice(start, start + pageSize);
+}
+
+function getNumberWidgetTotalPages(widgetId) {
+  const widget = dashboardWidgets.value[widgetId];
+  if (!widget) return 1;
+  const rows = getNumberWidgetRows(widgetId);
+  const pageSize = widget.pageSize || 4;
+  return Math.max(1, Math.ceil(rows.length / pageSize));
+}
+
 // Observer pour détecter les changements de thème
 let themeObserver = null;
 
@@ -833,6 +969,13 @@ onMounted(() => {
   userDashboard.value.forEach(widgetId => {
     if (dashboardWidgets.value[widgetId]?.type === 'chart') {
       selectedCryptoByWidget.value[widgetId] = userPortfolio.value[0]?.id || 'bitcoin';
+    }
+  });
+  // Initialiser la pagination pour les widgets number
+  userDashboard.value.forEach(widgetId => {
+    const widget = dashboardWidgets.value[widgetId];
+    if (widget && widget.type === 'number' && !tablePageByWidget.value[widgetId]) {
+      tablePageByWidget.value[widgetId] = 1;
     }
   });
   
@@ -951,78 +1094,78 @@ onUnmounted(() => {
   min-height: 250px;
 }
 
-/* Table styles */
-.crypto-table-wrapper {
-  overflow-x: auto;
-}
-
-.crypto-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.crypto-table thead {
-  background-color: var(--bg-tertiary);
-}
-
-.crypto-table th {
-  padding: 12px;
-  text-align: right;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.crypto-table th:first-child,
-.crypto-table td:first-child {
-  text-align: center;
-}
-
-.crypto-table th:nth-child(2),
-.crypto-table td:nth-child(2) {
-  text-align: left;
-}
-
-.crypto-table tbody tr {
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s;
-}
-
-.crypto-table tbody tr:hover {
-  background-color: var(--bg-tertiary);
-}
-
-.crypto-table td {
-  padding: 12px;
-  text-align: right;
-  color: var(--text-primary);
-}
-
-.crypto-table img {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.crypto-table .positive {
-  color: #16a34a;
-  font-weight: 500;
-}
-
-.crypto-table .negative {
-  color: #dc2626;
-  font-weight: 500;
-}
-
-.sparkline {
-  height: 40px;
-}
+/* Table styles are managed globally in assets/style.css to match themes */
+.crypto-table .sparkline { height: 40px; width: 120px; }
 
 .table-footer {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+
+/* -------- DASHBOARD GRID (mirror Settings) -------- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.dashboard-slot {
+  height: 210px;
+  position: relative;
+}
+
+.dash-item {
+  background: #ffe9c4;
+  border: 2px solid #d4b07a;
+  border-radius: 14px;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+/* -------- WIDGETS STYLES -------- */
+.widget-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #7a5600;
+  margin-bottom: 10px;
+}
+
+.widget-number { text-align: center; }
+.widget-value { font-size: 30px; font-weight: bold; margin: 8px 0; }
+.widget-value.positive { color: #16a34a; }
+.widget-value.negative { color: #dc2626; }
+
+.mini-table { width: 100%; font-size: 13px; }
+.mini-table td { padding: 3px 5px; }
+.mini-table .right { text-align: right; }
+
+.widget-table table { width: 100%; }
+.widget-table td { border-bottom: 1px solid #e4cfa6; padding: 5px 8px; }
+.widget-table .right { text-align: right; }
+
+.table-pagination { margin-top: 6px; display: flex; justify-content: center; gap: 6px; font-size: 13px; }
+.table-pagination button { background: #e0a74f; color: white; border-radius: 6px; border: none; padding: 3px 6px; cursor: pointer; }
+.table-pagination button:hover { background: #cf8e2f; }
+
+.chart-controls { text-align: center; margin-bottom: 4px; }
+.crypto-select { background: transparent; border: 1px solid #cfa45a; border-radius: 6px; padding: 4px 6px; color: #7a5600; font-weight: bold; }
+.dashboard-chart-container { height: 150px; width: 100%; }
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 900px) {
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-slot { height: auto; min-height: 220px; }
+  .dash-item { height: auto; }
+  .dashboard-chart-container { height: 190px !important; }
 }
 
 
