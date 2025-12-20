@@ -5,7 +5,7 @@
       <h1>TOP CRYPTO</h1>
       <h2>Bienvenue sur Top Crypto !</h2>
       <p>
-        Ceci est un site de visualisation des crypto-monnaies les plus importantes du marché actuel.
+        Ceci est un site de visualisation de certaines crypto-monnaies du marché actuel.
       </p>
       <h3>Améliorez vos suivis et analyses avec Top Crypto !</h3>
     </section>
