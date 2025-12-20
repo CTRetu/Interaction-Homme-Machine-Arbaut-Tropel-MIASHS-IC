@@ -233,12 +233,38 @@ onMounted(() => {
 
 .nav-link {
   font-weight: 600;
+  font-size: 14px;
   color: var(--text-color);
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  padding: 0;
 }
 
 .nav-link:hover {
   opacity: 0.8;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transform: translateY(-4px);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
 }
 
 /* ---------- PROFIL ---------- */

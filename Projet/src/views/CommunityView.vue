@@ -185,6 +185,11 @@ const publishArticle = () => {
   gap: 15px;
 }
 
+.article-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .article-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -302,14 +307,25 @@ const publishArticle = () => {
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
+  gap: 12px;
+  align-items: center;
+}
+
+.modal-actions .btn-primary {
+  border: 1px solid transparent;
 }
 
 .btn-secondary {
-  padding: 8px 10px;
+  margin-top: auto;
+  padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
   color: var(--text-color);
+  height: 45px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-secondary:hover {
